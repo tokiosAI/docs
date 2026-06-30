@@ -1,74 +1,51 @@
 ---
-title: "Get Started with Tokios in Under 5 Minutes"
+title: "Get started with Tokios in under 5 minutes"
 sidebarTitle: "Quickstart"
-description: "Install the Tokios Connector, pair your local model, and make your first OpenAI-compatible API call in under five minutes — no port forwarding needed."
+description: "Install the Tokios Connector, pair your local model, and make your first OpenAI-compatible API call in under five minutes without port forwarding."
 ---
 
-Tokios gets your local model online in a few steps: create a connector, run it next to your model, register the model, and call it. No port forwarding, no public IP, no NAT configuration. The connector dials out to Tokios once, and from that moment your model is reachable at a stable cloud endpoint that any OpenAI- or Anthropic-compatible client can target.
+Tokios gets your local model online in a few steps. Create a connector, run it next to your model, register a deployment, and call it from any OpenAI-compatible client.
+
+You do not need port forwarding, a public IP, or NAT configuration. The connector dials out to Tokios once, then your model is reachable through a stable cloud endpoint.
 
 <Steps>
   <Step title="Create your account">
-    Sign up at [tokios.com](https://tokios.com) — it's free and no credit card is required. After signing up you'll land in the Tokios dashboard, where you manage connectors, registered models, and API keys.
+    Sign up at [tokios.com](https://tokios.com). No credit card is required.
+
+    After signing up, you land in the Tokios dashboard. Use the dashboard to manage connectors, deployments, and API keys.
   </Step>
-  <Step title="Create your account">
-    Sign up at [tokios.com](https://tokios.com) — it's free and no credit card is required. After signing up you'll land in the Tokios dashboard, where you manage connectors, models, and API keys.
-  </Step>
+
   <Step title="Create a connector">
-    In the dashboard, create a **connector**. Tokios issues a `ConnectorId` and a one-time `Token` — copy the token now; it's shown only once.
+    In the dashboard, create a **connector**. Tokios issues a `ConnectorId` and a one-time `Token`.
+
+    Copy the token now. The dashboard shows it only once.
   </Step>
-  <Step title="Download and run the connector">
-    Grab the `tokios-connector` binary for your platform from the dashboard's **Downloads** page.
 
-    | Platform | Download |
-    | --- | --- |
-    | Windows x64 | `tokios-connector.exe` |
-    | macOS arm64 | `tokios-connector` |
-    | Linux x64 | `tokios-connector` |
+  <Step title="Run the connector next to your model">
+    Download the `tokios-connector` binary for your platform from the dashboard's **Downloads** page.
 
-    Create a minimal `tokios.json` config file next to the binary, replacing `<your-tunnel-token>` with the tunnel token shown in the dashboard:
+    Create `tokios-connector.json` next to the binary:
 
-    ```json tokios.json
+    ```json tokios-connector.json
     {
-      "tunnel_token": "<your-tunnel-token>",
-      "upstream": "http://localhost:11434"
+      "Connector": {
+        "ConnectorId": "con_your_connector_id",
+        "Token": "ct-your-connector-token",
+        "Models": ["gemma4:e4b"],
+        "Upstream": {
+          "BaseUrl": "http://127.0.0.1:11434/v1"
+        }
+      }
     }
     ```
+
+    `Models` is the upstream model id your local server uses. `BaseUrl` points at its OpenAI-compatible endpoint.
 
     <Note>
-      `11434` is Ollama's default port. If you're running llama.cpp, vLLM, or LM Studio, update `upstream` to match their listening address (e.g. `http://localhost:8080`).
+      Ollama uses `http://127.0.0.1:11434/v1` by default. For llama.cpp, vLLM, or LM Studio, use the matching URL from [Backends](/setup/supported-backends).
     </Note>
 
-    Then start the connector:
-
-    <CodeGroup>
-
-    ```bash macOS / Linux
-    ./tokios-connector --config tokios.json
-    ```
-
-    ```powershell Windows
-    tokios-connector.exe --config tokios.json
-    ```
-
-    </CodeGroup>
-
-    You should see a confirmation line like `[tokios] tunnel connected` in your terminal. The connector is now holding an outbound WebSocket to `api.tokios.com` — no inbound ports were opened on your machine.
-  </Step>
-  <Step title="Run the connector next to your model">
-    Download the `tokios-connector` binary for your platform from the dashboard's **Downloads** page, then create a `tokios-connector.json` beside it:
-
-    ```json tokios-connector.json
-    {
-      "Connector": {
-        "ConnectorId": "con_your_connector_id",
-        "Token": "ct-your-connector-token",
-        "Models": ["gemma4:e4b"],
-        "Upstream": { "BaseUrl": "http://127.0.0.1:11434/v1" }
-      }
-    }
-    ```
-
-    `Models` is the model id your local server uses, and `BaseUrl` points at it (the default is Ollama — see [Backends](/setup/supported-backends)). Start the connector:
+    Start the connector:
 
     <CodeGroup>
 
@@ -82,62 +59,27 @@ Tokios gets your local model online in a few steps: create a connector, run it n
 
     </CodeGroup>
 
-    The connector opens a single outbound WebSocket to Tokios — no inbound ports.
+    The connector opens a single outbound WebSocket to Tokios. It does not open inbound ports on your machine.
   </Step>
-  <Step title="Run the connector next to your model">
-    Download the `tokios-connector` binary for your platform from the dashboard's **Downloads** page, then create a `tokios-connector.json` beside it:
 
-    ```json tokios-connector.json
-    {
-      "Connector": {
-        "ConnectorId": "con_your_connector_id",
-        "Token": "ct-your-connector-token",
-        "Models": ["gemma4:e4b"],
-        "Upstream": { "BaseUrl": "http://127.0.0.1:11434/v1" }
-      }
-    }
-    ```
+  <Step title="Register your deployment">
+    Back in the dashboard, create a **deployment**.
 
-    `Models` is the model id your local server uses, and `BaseUrl` points at it (the default is Ollama — see [Backends](/setup/supported-backends)). Start the connector:
+    Give it a public model name, for example `gemma-tunnel`. Select the connector you just started, then point it at the upstream model id the connector serves, such as `gemma4:e4b`.
 
-    <CodeGroup>
-
-    ```bash macOS / Linux
-    ./tokios-connector --config tokios-connector.json
-    ```
-
-    ```powershell Windows
-    tokios-connector.exe --config tokios-connector.json
-    ```
-
-    </CodeGroup>
-
-    The connector opens a single outbound WebSocket to Tokios — no inbound ports.
+    Use the public deployment name as the `model` field in API requests.
   </Step>
-  <Step title="Register your model">
-    In the Tokios dashboard, navigate to **Connectors** and click **Pair Connector**. Select the connector that just came online and give your model a name — for example, `gemma-tunnel`.
 
-    Tokios registers the model and assigns it a stable, cloud-reachable deployment identifier tied to your account. You'll use this name as the `model` field in every API request.
-  </Step>
-  <Step title="Register your model">
-    Back in the dashboard, create a **deployment**: give it a public model name — for example, `gemma-tunnel` — select the connector you just started, and point it at the upstream model id the connector serves (`gemma4:e4b`). This public name is what you send as the `"model"` field in every API request.
-  </Step>
-  <Step title="Register your model">
-    Back in the dashboard, create a **deployment**: give it a public model name — for example, `gemma-tunnel` — select the connector you just started, and point it at the upstream model id the connector serves (`gemma4:e4b`). This public name is what you send as the `"model"` field in every API request.
-  </Step>
-  <Step title="Mint an API key">
-    Go to **API Keys** in the dashboard and click **Generate Key**. Tokios issues a tenant-scoped key in the form `sk-tokios-...`.
+  <Step title="Create an API key">
+    Go to **API Keys** and click **Generate Key**. Tokios issues a tenant-scoped key in the form `sk-tokios-...`.
 
-    Copy it now and store it somewhere safe (a password manager or secrets vault). The dashboard will not show it again after you close the dialog.
+    Copy the key now and store it in a password manager or secrets vault. The dashboard will not show it again.
   </Step>
-  <Step title="Mint an API key">
-    Go to **API Keys** and click **Generate Key**. Tokios issues a tenant-scoped key in the form `sk-tokios-...`. Copy it now and store it somewhere safe — the dashboard won't show it again.
-  </Step>
-  <Step title="Mint an API key">
-    Go to **API Keys** and click **Generate Key**. Tokios issues a tenant-scoped key in the form `sk-tokios-...`. Copy it now and store it somewhere safe — the dashboard won't show it again.
-  </Step>
+
   <Step title="Make your first call">
-    With the connector running and your key in hand, send a request to the Tokios endpoint. Swap in your real key and model name:
+    With the connector running and your key in hand, send a request.
+
+    Replace `sk-tokios-YOUR_KEY` and `gemma-tunnel` with your real API key and public deployment name:
 
     ```bash
     curl https://api.tokios.com/v1/chat/completions \
@@ -174,76 +116,6 @@ Tokios gets your local model online in a few steps: create a connector, run it n
       }
     }
     ```
-
-    Your local model just answered a call from the cloud — without ever opening a port. 🎉
-  </Step>
-  <Step title="Make your first call">
-    With the connector running and your key in hand, send a request. Swap in your real key and your public model name:
-
-    ```bash
-    curl https://api.tokios.com/v1/chat/completions \
-      -H "Authorization: Bearer sk-tokios-YOUR_KEY" \
-      -H "Content-Type: application/json" \
-      -d '{
-        "model": "gemma-tunnel",
-        "messages": [{"role": "user", "content": "Hello!"}]
-      }'
-    ```
-
-    A successful response looks like this:
-
-    ```json
-    {
-      "id": "chatcmpl-a1b2c3d4",
-      "object": "chat.completion",
-      "created": 1718000000,
-      "model": "gemma-tunnel",
-      "choices": [
-        {
-          "index": 0,
-          "message": { "role": "assistant", "content": "Hello! How can I help you today?" },
-          "finish_reason": "stop"
-        }
-      ],
-      "usage": { "prompt_tokens": 10, "completion_tokens": 9, "total_tokens": 19 }
-    }
-    ```
-
-    Your local model just answered a call from the cloud — without opening a port. 🎉
-  </Step>
-  <Step title="Make your first call">
-    With the connector running and your key in hand, send a request. Swap in your real key and your public model name:
-
-    ```bash
-    curl https://api.tokios.com/v1/chat/completions \
-      -H "Authorization: Bearer sk-tokios-YOUR_KEY" \
-      -H "Content-Type: application/json" \
-      -d '{
-        "model": "gemma-tunnel",
-        "messages": [{"role": "user", "content": "Hello!"}]
-      }'
-    ```
-
-    A successful response looks like this:
-
-    ```json
-    {
-      "id": "chatcmpl-a1b2c3d4",
-      "object": "chat.completion",
-      "created": 1718000000,
-      "model": "gemma-tunnel",
-      "choices": [
-        {
-          "index": 0,
-          "message": { "role": "assistant", "content": "Hello! How can I help you today?" },
-          "finish_reason": "stop"
-        }
-      ],
-      "usage": { "prompt_tokens": 10, "completion_tokens": 9, "total_tokens": 19 }
-    }
-    ```
-
-    Your local model just answered a call from the cloud — without opening a port. 🎉
   </Step>
 </Steps>
 
@@ -254,7 +126,7 @@ Tokios gets your local model online in a few steps: create a connector, run it n
     Point Claude Code at Tokios and run your AI coding agent against your own local model.
   </Card>
 
-  <Card title="API Endpoints Reference" icon="rectangle-terminal" href="/reference/api-endpoints">
-    Explore the supported paths — `/v1/chat/completions`, `/v1/messages`, `/v1/responses`, and more.
+  <Card title="API endpoints reference" icon="rectangle-terminal" href="/reference/api-endpoints">
+    Explore `/v1/chat/completions`, `/v1/messages`, `/v1/responses`, and more.
   </Card>
 </CardGroup>

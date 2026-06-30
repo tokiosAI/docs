@@ -1,33 +1,44 @@
-> **First-time setup**: Customize this file for your project. Prompt the user to customize this file for their project.
-> For Mintlify product knowledge (components, configuration, writing standards),
-> install the Mintlify skill: `npx skills add https://mintlify.com/docs`
+# Tokios documentation agent instructions
 
-# Documentation project instructions
+## Project context
 
-## About this project
-
-- This is a documentation site built on [Mintlify](https://mintlify.com)
-- Pages are MDX files with YAML frontmatter
-- Configuration lives in `docs.json`
-- Use the Mintlify MCP server, `https://mcp.mintlify.com`, to edit content and settings via MCP
-- Use the Mintlify docs MCP server, `https://www.mintlify.com/docs/mcp`, to query information about using Mintlify via MCP
+- This is the Tokios documentation site built with Mintlify.
+- Pages are MDX files with YAML frontmatter.
+- Site configuration lives in `docs.json`.
+- Tokios exposes private local models through `https://api.tokios.com` by using an outbound-only connector tunnel.
+- The docs should help readers install the connector, register deployments, create API keys, and use Tokios from OpenAI- or Anthropic-compatible clients.
 
 ## Terminology
 
-{/* Add product-specific terms and preferred usage */}
-{/* Example: Use "workspace" not "project", "member" not "user" */}
+- Use "connector" for the local `tokios-connector` process.
+- Use "deployment" for the public model name that API clients send in the `model` field.
+- Use "upstream model id" for the model id served by Ollama, llama.cpp, vLLM, LM Studio, or another local backend.
+- Use "API key" for `sk-tokios-...` keys.
+- Use "token" only for connector pairing tokens or model tokens.
+- Use "dashboard" for the Tokios web UI.
 
-## Style preferences
+## Writing style
 
-{/* Add any project-specific style rules below */}
-
-- Use active voice and second person ("you")
-- Keep sentences concise — one idea per sentence
-- Use sentence case for headings
-- Bold for UI elements: Click **Settings**
-- Code formatting for file names, commands, paths, and code references
+- Use active voice and second person.
+- Keep sentences concise. Prefer one idea per sentence.
+- Use sentence case for headings.
+- Bold UI labels, for example: Click **API Keys**.
+- Use code formatting for file names, commands, paths, environment variables, API paths, and identifiers.
+- Prefer task-oriented pages that start with what the reader can do.
+- Put prerequisites before commands.
+- Use notes, tips, and warnings only when they prevent mistakes or answer likely questions.
 
 ## Content boundaries
 
-{/* Define what should and shouldn't be documented */}
-{/* Example: Don't document internal admin features */}
+- Do not document internal admin tools or unreleased dashboard features.
+- Do not include real API keys, connector tokens, tenant ids, customer data, or production credentials.
+- Use placeholder secrets such as `sk-tokios-YOUR_KEY` and `ct-your-connector-token`.
+- Do not claim Tokios supports a backend, API surface, or client unless the repo already documents it or the product team confirms it.
+- Avoid marketing claims unless they help a setup or troubleshooting task.
+
+## Mintlify conventions
+
+- Every page should include `title`, `sidebarTitle`, and `description` frontmatter.
+- Keep navigation entries in `docs.json` synchronized with file paths.
+- Use Mintlify components when they improve scanning, especially `Steps`, `CodeGroup`, `Tabs`, `AccordionGroup`, `Note`, `Tip`, and `Warning`.
+- Keep `AGENTS.md` files private with `.mintignore` so agent instructions are not published as documentation pages.
