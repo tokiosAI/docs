@@ -1,0 +1,91 @@
+---
+title: "Use Claude Code with Your Own Local Models via Tokios"
+sidebarTitle: "Claude Code"
+description: "Point Claude Code at your private local model by setting ANTHROPIC_BASE_URL and ANTHROPIC_API_KEY to route every request through the Tokios gateway."
+---
+
+Claude Code reads two environment variables to determine where to send requests. By overriding `ANTHROPIC_BASE_URL` to point at Tokios and setting your Tokios API key, Claude Code routes every request down your private tunnel to the model running on your hardware.
+
+## Prerequisites
+
+- A running Tokios Connector paired with your local model — see [Connector Install](/setup/connector-install)
+- A registered model deployment name — see [Register a Model](/setup/register-model)
+- A Tokios API key — see [API Keys](/setup/api-keys)
+- Claude Code installed
+
+## Set up the environment
+
+<Tabs>
+  <Tab title="Windows CMD">
+    ```cmd claude-code-windows.cmd
+    set ANTHROPIC_BASE_URL=https://api.tokios.com
+    set ANTHROPIC_API_KEY=sk-tokios-YOUR_KEY_HERE
+    claude --model gemma-tunnel
+    ```
+  </Tab>
+  <Tab title="macOS & Linux">
+    ```bash claude-code-unix.sh
+    export ANTHROPIC_BASE_URL=https://api.tokios.com
+    export ANTHROPIC_API_KEY=sk-tokios-YOUR_KEY_HERE
+    claude --model gemma-tunnel
+    ```
+  </Tab>
+</Tabs>
+
+<Tip>
+  Always pass `--model` with your registered model name. Claude Code's model picker only lists `claude*` ids, so it won't show your Tokios models — naming it explicitly routes the request to your deployment.
+</Tip>
+
+## Persist the configuration
+
+To avoid exporting the variables in every new terminal session, add them to your shell profile or a `.env` file.
+
+**~/.bashrc or ~/.zshrc**
+
+Open your shell profile and append:
+
+```bash
+export ANTHROPIC_BASE_URL=https://api.tokios.com
+export ANTHROPIC_API_KEY=sk-tokios-YOUR_KEY_HERE
+```
+
+Then reload it:
+
+```bash
+source ~/.bashrc   # or source ~/.zshrc
+```
+
+**.env file**
+
+If your workflow supports `.env` files (for example, via `direnv` or a shell plugin), create a `.env` in your project root:
+
+```bash .env
+ANTHROPIC_BASE_URL=https://api.tokios.com
+ANTHROPIC_API_KEY=sk-tokios-YOUR_KEY_HERE
+```
+
+Load it before starting Claude Code:
+
+```bash
+export $(cat .env | xargs) && claude --model gemma-tunnel
+```
+
+## Verify the connection
+
+Run a quick one-shot prompt to confirm that Claude Code is reaching your local model through Tokios:
+
+```bash
+claude --model gemma-tunnel -p "Say hello"
+```
+
+Expected output:
+
+```text
+Hello! How can I help you today?
+```
+
+If you see a response, your requests are flowing through the Tokios gateway to your local model successfully.
+
+<Note>
+  Claude Code sends the request in Anthropic messages format. Tokios translates it to whatever your local backend expects and streams the response back.
+</Note>

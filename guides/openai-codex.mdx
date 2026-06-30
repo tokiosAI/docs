@@ -1,0 +1,77 @@
+---
+title: "Use OpenAI Codex with Your Own Local Models via Tokios"
+sidebarTitle: "OpenAI Codex"
+description: "Route OpenAI Codex CLI requests to your private local model by adding a Tokios model provider with the Responses wire API to config.toml."
+---
+
+OpenAI Codex talks to Tokios through the **Responses** API. Add Tokios as a model provider in `~/.codex/config.toml`, point it at `https://api.tokios.com/v1`, and Codex routes every request down your private tunnel to your local model.
+
+## Prerequisites
+
+- A running Tokios Connector paired with your local model — see [Connector Install](/setup/connector-install)
+- A registered model deployment name — see [Register a Model](/setup/register-model)
+- A Tokios API key — see [API Keys](/setup/api-keys)
+- OpenAI Codex installed
+
+## Configure Codex
+
+Set your Tokios key in the environment, then add a Tokios provider and profile to `~/.codex/config.toml`:
+
+<CodeGroup>
+
+```bash macOS / Linux
+export OPENAI_API_KEY=sk-tokios-YOUR_KEY_HERE
+```
+
+```powershell Windows
+set OPENAI_API_KEY=sk-tokios-YOUR_KEY_HERE
+```
+
+</CodeGroup>
+
+```toml ~/.codex/config.toml
+[model_providers.tokios]
+name = "Tokios"
+base_url = "https://api.tokios.com/v1"
+wire_api = "responses"
+
+[profiles.tokios]
+model = "gemma-tunnel"
+model_provider = "tokios"
+disable_response_storage = true
+```
+
+<Note>
+  `wire_api = "responses"` and `disable_response_storage = true` are both required. Tokios serves the Responses surface statelessly, so Codex must not rely on server-side response storage.
+</Note>
+
+Then run Codex with the Tokios profile:
+
+```bash
+codex --profile tokios
+```
+
+Replace `gemma-tunnel` with the public model name you registered in the dashboard.
+
+## Using the OpenAI Python SDK
+
+To call your local model programmatically with the OpenAI SDK, point the client at the Tokios base URL:
+
+```python openai_tokios.py
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.tokios.com/v1",
+    api_key="sk-tokios-YOUR_KEY_HERE",
+)
+
+response = client.chat.completions.create(
+    model="gemma-tunnel",
+    messages=[{"role": "user", "content": "Explain async/await in Python"}],
+)
+print(response.choices[0].message.content)
+```
+
+<Note>
+  The OpenAI SDK's base URL must end with `/v1`. The Tokios endpoint is `https://api.tokios.com/v1`.
+</Note>

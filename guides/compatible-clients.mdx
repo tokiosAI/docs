@@ -1,0 +1,56 @@
+---
+title: "Connect Any OpenAI or Anthropic-Compatible Client to Tokios"
+sidebarTitle: "Compatible Clients"
+description: "Any client that supports a custom base URL for OpenAI or Anthropic APIs can route to your local model through Tokios with two config changes."
+---
+
+Tokios exposes standard OpenAI and Anthropic API surfaces, so any tool or library that allows you to override the base URL works out of the box. The only changes needed are the base URL and your Tokios API key.
+
+## Supported clients
+
+| Client | Base URL env/setting | API key env/setting |
+|---|---|---|
+| Claude Code | `ANTHROPIC_BASE_URL` | `ANTHROPIC_API_KEY` |
+| OpenAI Codex | `OPENAI_BASE_URL` | `OPENAI_API_KEY` |
+| OpenAI Python SDK | `base_url` param | `api_key` param |
+| OpenAI Node.js SDK | `baseURL` param | `apiKey` param |
+| LangChain (Python) | `openai_api_base` | `openai_api_key` |
+| Cursor IDE | Custom model base URL | API key field |
+| Continue.dev | `apiBase` | `apiKey` |
+
+<Tip>
+  If your client uses `OPENAI_BASE_URL` or `ANTHROPIC_BASE_URL`, you can set those environment variables once and every compatible tool in your terminal session picks them up automatically.
+</Tip>
+
+## Code examples
+
+### OpenAI Node.js SDK
+
+```javascript openai_node.js
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  baseURL: 'https://api.tokios.com/v1',
+  apiKey: 'sk-tokios-YOUR_KEY_HERE',
+});
+
+const response = await client.chat.completions.create({
+  model: 'gemma-tunnel',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+console.log(response.choices[0].message.content);
+```
+
+### LangChain (Python)
+
+```python langchain_tokios.py
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(
+    model="gemma-tunnel",
+    openai_api_base="https://api.tokios.com/v1",
+    openai_api_key="sk-tokios-YOUR_KEY_HERE",
+)
+result = llm.invoke("Summarize this code: print('hello')")
+print(result.content)
+```

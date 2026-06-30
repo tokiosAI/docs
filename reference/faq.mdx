@@ -1,0 +1,79 @@
+---
+title: "Tokios FAQ: Setup, Connectivity, and Troubleshooting"
+sidebarTitle: "FAQ"
+description: "Answers to common questions about Tokios setup, firewall requirements, API compatibility, streaming, data privacy, supported backends, and billing."
+---
+
+This page covers the most common questions and issues when setting up and using Tokios.
+
+---
+
+## Setup & connectivity
+
+<AccordionGroup>
+  <Accordion title="The connector starts but my requests return 503">
+    A `503` means the Tokios gateway can't reach an active connector tunnel for the requested model. Check that:
+
+    1. The connector process is still running and connected.
+    2. The model name in your API request matches a deployment you registered in the dashboard.
+    3. Your `ConnectorId` and `Token` in `tokios-connector.json` match the connector shown in the dashboard.
+  </Accordion>
+
+  <Accordion title="Do I need to open any firewall ports?">
+    No. The connector only dials outbound to Tokios over WebSockets (port 443). Your firewall needs no changes, and nothing on your machine listens for inbound connections.
+  </Accordion>
+
+  <Accordion title="Can I run the connector on a different machine than my model?">
+    Yes. By default the connector forwards only to `localhost`. To point an upstream at another host on your network, set `AllowLan: true` on that upstream and add the host to its `AllowedHosts` — for example, `http://192.168.1.50:11434/v1`. See [Connector Config](/reference/connector-config).
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## API compatibility
+
+<AccordionGroup>
+  <Accordion title="Which API surfaces does Tokios support?">
+    Three: OpenAI Chat Completions (`/v1/chat/completions`), Anthropic Messages (`/v1/messages`), and OpenAI Responses (`/v1/responses`), plus `/v1/models` and `/v1/messages/count_tokens`. The gateway translates Messages and Responses to Chat Completions for your model. Provider-specific features that depend on a vendor's own backend (OpenAI Assistants, Files, fine-tuning) are not available.
+  </Accordion>
+
+  <Accordion title="Can I use streaming responses?">
+    Yes. Set `"stream": true` in your request body. Tokios returns server-sent events in the standard OpenAI/Anthropic streaming format on all surfaces.
+  </Accordion>
+
+  <Accordion title="My client sends requests to /v1 — will it work?">
+    Yes. For SDK clients, set the base URL to `https://api.tokios.com/v1` (with the `/v1` suffix). For Anthropic-style clients that use `ANTHROPIC_BASE_URL`, set it to `https://api.tokios.com` (no `/v1` — the client appends the path). Check your client's docs for which form it expects.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Local models
+
+<AccordionGroup>
+  <Accordion title="Does Tokios store my prompts or model responses?">
+    No. Tokios routes requests through the tunnel to your local model and streams the response back. Prompt and response bodies are not stored on Tokios infrastructure — only usage counts and metadata are recorded.
+  </Accordion>
+
+  <Accordion title="Which model backends are supported?">
+    Any server that exposes an OpenAI-compatible Chat Completions API: Ollama, llama.cpp, vLLM, and LM Studio are the most common. Set the upstream `BaseUrl` (including `/v1`) in `tokios-connector.json`. See [Backends](/setup/supported-backends).
+  </Accordion>
+
+  <Accordion title="Can I serve multiple models?">
+    Yes. A single connector can serve several models using `Routes` \+ `Upstreams`, and you register a deployment (public name) for each. You can also run one connector per model. See [Model Routing](/guides/model-routing).
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Account & billing
+
+<AccordionGroup>
+  <Accordion title="Is Tokios free?">
+    Yes — the community tier is free with no credit card required, giving you full access to run and evaluate Tokios with your own hardware.
+  </Accordion>
+
+  <Accordion title="How do I revoke an API key?">
+    In the dashboard, go to **API Keys**, find the key, and click **Revoke**. The key stops authenticating immediately.
+  </Accordion>
+</AccordionGroup>

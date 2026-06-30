@@ -1,0 +1,84 @@
+---
+title: "Supported Local Model Backends — Tokios Connector"
+sidebarTitle: "Backends"
+description: "Point the Tokios Connector at Ollama, llama.cpp, vLLM, or LM Studio by setting the upstream BaseUrl (including /v1) in tokios-connector.json. Your server must speak OpenAI Chat Completions."
+---
+
+The Tokios Connector forwards to any model server that exposes an **OpenAI-compatible Chat Completions API** (`/v1/chat/completions`) on your machine. Ollama, llama.cpp, vLLM, and LM Studio all do. The gateway translates each incoming request to Chat Completions and sends it down the tunnel; the connector forwards it to the upstream `BaseUrl` you set in `tokios-connector.json`. Point the connector at your server by setting that `BaseUrl` — **including the `/v1` segment**.
+
+<Note>
+  Always include `/v1` in `BaseUrl`, and use your backend's **OpenAI-compatible** endpoint. For Ollama that's the `/v1` API (not the native `/api`).
+</Note>
+
+## Default ports
+
+Drop the matching `Upstream` into your `tokios-connector.json` (see [Connector Config](/reference/connector-config) for the full file):
+
+<CodeGroup>
+
+```json Ollama
+"Upstream": { "BaseUrl": "http://127.0.0.1:11434/v1" }
+```
+
+```json llama.cpp
+"Upstream": { "BaseUrl": "http://127.0.0.1:8080/v1" }
+```
+
+```json vLLM
+"Upstream": { "BaseUrl": "http://127.0.0.1:8000/v1" }
+```
+
+```json LM Studio
+"Upstream": { "BaseUrl": "http://127.0.0.1:1234/v1" }
+```
+
+</CodeGroup>
+
+<Note>
+  The model id your server uses (for Ollama, whatever you `ollama run`) is what you list in the connector's `Models` / `Routes`. You give it a public API name when you [register a deployment](/setup/register-model).
+</Note>
+
+## Backend details
+
+### Ollama
+
+**Upstream:** `http://127.0.0.1:11434/v1`
+
+Ollama serves an OpenAI-compatible API at `/v1` on port `11434`. Pull and run your model first — the id you give Ollama is the upstream model id the connector serves:
+
+```bash
+ollama run gemma4:e4b
+```
+
+### llama.cpp
+
+**Upstream:** `http://127.0.0.1:8080/v1`
+
+Run the bundled OpenAI-compatible server, `llama-server`. It listens on port `8080` by default and serves `/v1`:
+
+```bash
+llama-server -m ./models/my-model.gguf --port 8080
+```
+
+### vLLM
+
+**Upstream:** `http://127.0.0.1:8000/v1`
+
+vLLM's OpenAI-compatible server listens on port `8000`. Start it with:
+
+```bash
+vllm serve mistralai/Mistral-7B-Instruct-v0.2
+```
+
+### LM Studio
+
+**Upstream:** `http://127.0.0.1:1234/v1`
+
+LM Studio includes a built-in OpenAI-compatible server:
+
+1. Open LM Studio and go to the **Developer** (Local Server) tab.
+2. Load a model and start the server. It listens on port `1234`.
+
+<Tip>
+  Running on a different port? Just change the port in `BaseUrl`. Any server that speaks OpenAI Chat Completions works.
+</Tip>

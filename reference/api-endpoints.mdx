@@ -1,0 +1,244 @@
+---
+title: "Tokios API Endpoints: OpenAI & Anthropic Reference"
+sidebarTitle: "API Endpoints"
+description: "Reference for Tokios API endpoints — /v1/chat/completions, /v1/messages, /v1/messages/count_tokens, /v1/responses, and /v1/models — with request and response schemas."
+---
+
+All Tokios API requests are sent to `https://api.tokios.com` with your `sk-tokios-...` key as a Bearer token. Tokios exposes the OpenAI Chat Completions, OpenAI Responses, and Anthropic Messages surfaces, plus model listing and token counting.
+
+<Info>
+  **Base URL**
+
+  ```text
+  https://api.tokios.com
+  ```
+</Info>
+
+## Authentication
+
+Every request requires these headers:
+
+```http
+Authorization: Bearer sk-tokios-YOUR_KEY_HERE
+Content-Type: application/json
+```
+
+The `model` field in each request is the **public deployment name** you registered (e.g. `gemma-tunnel`), not your local model id.
+
+---
+
+## POST /v1/chat/completions
+
+OpenAI-compatible chat completions endpoint. Send a list of messages and receive a completion from your registered model.
+
+### Request body
+
+<ParamField body="model" type="string" required>
+  The public deployment name (e.g. `"gemma-tunnel"`).
+</ParamField>
+
+<ParamField body="messages" type="array" required>
+  Array of message objects. Each has a `role` (`"system"`, `"user"`, or `"assistant"`) and `content`. Content may be a string or an array of content blocks (text, tool calls, images) — Tokios passes the structure through.
+</ParamField>
+
+<ParamField body="stream" default="false" type="boolean">
+  Stream the response using server-sent events.
+</ParamField>
+
+<ParamField body="temperature" type="number">
+  Sampling temperature. Higher values produce more random output.
+</ParamField>
+
+<ParamField body="max_tokens" type="integer">
+  Maximum number of tokens to generate.
+</ParamField>
+
+### Example request
+
+```bash
+curl https://api.tokios.com/v1/chat/completions \
+  -H "Authorization: Bearer sk-tokios-YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gemma-tunnel",
+    "messages": [
+      {"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "What is 2 + 2?"}
+    ]
+  }'
+```
+
+### Example response
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "created": 1717000000,
+  "model": "gemma-tunnel",
+  "choices": [
+    {
+      "index": 0,
+      "message": { "role": "assistant", "content": "2 + 2 equals 4." },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": { "prompt_tokens": 24, "completion_tokens": 9, "total_tokens": 33 }
+}
+```
+
+---
+
+## POST /v1/messages
+
+Anthropic-compatible messages endpoint. Send a messages array and receive a response in Anthropic's format. Tokios translates this to Chat Completions for your model and back.
+
+### Request body
+
+<ParamField body="model" type="string" required>
+  The public deployment name.
+</ParamField>
+
+<ParamField body="messages" type="array" required>
+  Array of message objects with a `role` (`"user"` or `"assistant"`) and `content` (a string or an array of content blocks).
+</ParamField>
+
+<ParamField body="max_tokens" type="integer" required>
+  Maximum number of tokens to generate.
+</ParamField>
+
+<ParamField body="system" type="string">
+  System prompt to prepend to the conversation.
+</ParamField>
+
+<ParamField body="stream" default="false" type="boolean">
+  Stream the response using server-sent events.
+</ParamField>
+
+### Example request
+
+```bash
+curl https://api.tokios.com/v1/messages \
+  -H "Authorization: Bearer sk-tokios-YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gemma-tunnel",
+    "max_tokens": 256,
+    "messages": [{"role": "user", "content": "Explain async/await"}]
+  }'
+```
+
+### Example response
+
+```json
+{
+  "id": "msg_abc123",
+  "type": "message",
+  "role": "assistant",
+  "content": [{ "type": "text", "text": "Async/await is a syntax for handling asynchronous operations..." }],
+  "model": "gemma-tunnel",
+  "stop_reason": "end_turn",
+  "usage": { "input_tokens": 12, "output_tokens": 48 }
+}
+```
+
+---
+
+## POST /v1/messages/count\_tokens
+
+Anthropic-compatible token counting. Send the same body shape as `/v1/messages` and receive the input token count without running a completion.
+
+### Example request
+
+```bash
+curl https://api.tokios.com/v1/messages/count_tokens \
+  -H "Authorization: Bearer sk-tokios-YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gemma-tunnel",
+    "messages": [{"role": "user", "content": "Explain async/await"}]
+  }'
+```
+
+### Example response
+
+```json
+{ "input_tokens": 12 }
+```
+
+---
+
+## POST /v1/responses
+
+OpenAI Responses API endpoint, compatible with the newer Responses format (used by OpenAI Codex). Tokios translates it to Chat Completions for your model.
+
+### Request body
+
+<ParamField body="model" type="string" required>
+  The public deployment name.
+</ParamField>
+
+<ParamField body="input" type="string | array" required>
+  The input text, or an array of input items, to generate a response for.
+</ParamField>
+
+<ParamField body="stream" default="false" type="boolean">
+  Stream the response using server-sent events.
+</ParamField>
+
+### Example request
+
+```bash
+curl https://api.tokios.com/v1/responses \
+  -H "Authorization: Bearer sk-tokios-YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gemma-tunnel",
+    "input": "Write a haiku about tunnels."
+  }'
+```
+
+---
+
+## GET /v1/models
+
+Lists the model deployments your API key can use. OpenAI-compatible list shape.
+
+### Example request
+
+```bash
+curl https://api.tokios.com/v1/models \
+  -H "Authorization: Bearer sk-tokios-YOUR_KEY"
+```
+
+### Example response
+
+```json
+{
+  "object": "list",
+  "data": [
+    { "id": "gemma-tunnel", "object": "model", "owned_by": "tokios" },
+    { "id": "qwen-coder", "object": "model", "owned_by": "tokios" }
+  ]
+}
+```
+
+<Note>
+  Claude Code's model picker only lists `claude*` ids, so it won't show your Tokios models. Pass the model explicitly with `claude --model gemma-tunnel` — see the [Claude Code guide](/guides/claude-code).
+</Note>
+
+---
+
+## Error codes
+
+| HTTP status | Meaning |
+| --- | --- |
+| 400 | Malformed request body |
+| 401 | Missing or invalid API key |
+| 403 | The key isn't allowed to use this model, or the account is suspended |
+| 404 | Model deployment not found |
+| 503 | Connector offline or at capacity (`connector_unavailable` / `connector_busy`) |
+
+<Warning>
+  A `503` means the connector for that deployment isn't currently connected (or is at its concurrency cap). Start the connector and confirm it shows online in the dashboard before retrying.
+</Warning>

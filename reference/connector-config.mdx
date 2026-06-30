@@ -1,0 +1,273 @@
+---
+title: "Tokios Connector Configuration: tokios-connector.json Reference"
+sidebarTitle: "Connector Config"
+description: "Full reference for the Tokios Connector config file and CLI flags — ConnectorId, Token, Routes, Upstreams, logging, and running as a service."
+---
+
+The Tokios Connector reads its settings from a JSON config file. You pass the file with `--config`, and any setting can be overridden with a command-line flag at startup. The connector never reads environment variables, and it only ever forwards to the upstreams you define here — never to a URL supplied by the gateway.
+
+<Note>
+  Your `ConnectorId` and `Token` are issued by the Tokios dashboard when you create a connector. The token is shown only once — paste it into your config file and store it somewhere safe.
+</Note>
+
+## The config file
+
+A minimal config has a `Connector` section with your credentials and one local upstream:
+
+```json tokios-connector.json
+{
+  "Connector": {
+    "ConnectorId": "con_your_connector_id",
+    "Token": "ct-your-connector-token",
+    "Models": ["gemma4:e4b"],
+    "Upstream": {
+      "BaseUrl": "http://127.0.0.1:11434/v1"
+    }
+  }
+}
+```
+
+Start the connector pointing at that file:
+
+```bash
+tokios-connector --config tokios-connector.json
+```
+
+## `Connector` fields
+
+<ParamField body="ConnectorId" type="string" required>
+  The connector's id from the dashboard (e.g. `con_...`). Identifies this connector to the Tokios gateway.
+</ParamField>
+
+<ParamField body="Token" type="string" required>
+  The connector token issued when you create the connector (e.g. `ct-...`), bound to your tenant. Shown only once in the dashboard.
+</ParamField>
+
+<ParamField body="ServerUrl" type="string">
+  The `wss://` gateway endpoint the connector dials. Defaults to the hosted Tokios gateway, so you normally leave this unset. (Self-hosted deployments point it at their own server, e.g. `wss://your-server/connector/connect`.)
+</ParamField>
+
+<ParamField body="ConcurrencyCap" default="8" type="integer">
+  Maximum number of in-flight requests the connector forwards at once. Requests beyond the cap are rejected with `503 connector_busy` until a slot frees.
+</ParamField>
+
+## Declaring what the connector serves
+
+Pick **one** of two shapes — specifying both is rejected.
+
+**Single upstream** — one local server serving one or more model ids:
+
+```json tokios-connector.json
+"Connector": {
+  "ConnectorId": "con_...",
+  "Token": "ct-...",
+  "Models": ["gemma4:e4b"],
+  "Upstream": { "BaseUrl": "http://127.0.0.1:11434/v1" }
+}
+```
+
+**Multiple upstreams** — route different model ids to different local servers:
+
+```json tokios-connector.json
+"Connector": {
+  "ConnectorId": "con_...",
+  "Token": "ct-...",
+  "Routes": [
+    { "Model": "gemma4:e4b",    "UpstreamId": "ollama" },
+    { "Model": "qwen2.5-coder", "UpstreamId": "lmstudio" }
+  ],
+  "Upstreams": {
+    "ollama":   { "BaseUrl": "http://127.0.0.1:11434/v1" },
+    "lmstudio": { "BaseUrl": "http://127.0.0.1:1234/v1" }
+  }
+}
+```
+
+The ids in `Models` / `Routes[].Model` are the model ids your local server uses — what you'd send it directly (e.g. `gemma4:e4b` in Ollama). You expose one under a public API name (e.g. `gemma-tunnel`) by registering a **deployment** in the dashboard; that public name is what clients send in the `"model"` field, and the gateway rewrites it to the upstream id before forwarding it down the tunnel. See [Model Routing](/guides/model-routing).
+
+## Upstream fields
+
+Each upstream — the single `Upstream`, or each entry under `Upstreams` — accepts:
+
+<ParamField body="BaseUrl" type="string" required>
+  The base URL of your model server, **including the `/v1` segment** — e.g. `http://127.0.0.1:11434/v1`. The connector appends the request path (`/chat/completions`) to it. Your server must expose an OpenAI-compatible Chat Completions API. See [Backends](/setup/supported-backends).
+</ParamField>
+
+<ParamField body="AllowedHosts" type="string[]">
+  Hosts this upstream is allowed to reach. Defaults to loopback only: `["127.0.0.1", "::1", "localhost"]`.
+</ParamField>
+
+<ParamField body="AllowedPaths" type="string[]">
+  Request paths the connector may forward. Defaults to `["/chat/completions"]`.
+</ParamField>
+
+<ParamField body="AllowLan" default="false" type="boolean">
+  Allow a non-loopback upstream (a LAN host, or a remote provider). Required — together with an `AllowedHosts` entry for that host — for any upstream that isn't localhost.
+</ParamField>
+
+<Note>
+  By default the connector only forwards to `localhost`. To reach a model on another machine on your network, set `AllowLan: true` and add the host to `AllowedHosts`.
+</Note>
+
+### Authenticating to a remote upstream
+
+To forward to a hosted, OpenAI-compatible provider instead of a local server, set `AllowLan: true`, add the host to `AllowedHosts`, and supply credentials on the upstream:
+
+<ParamField body="ApiKey" type="string">
+  The key injected into the upstream request.
+</ParamField>
+
+<ParamField body="ApiKeyHeader" default="Authorization" type="string">
+  The header the key is sent in. Use `x-api-key` for Anthropic-style providers, `api-key` for Azure OpenAI.
+</ParamField>
+
+<ParamField body="ApiKeyPrefix" default="Bearer " type="string">
+  Prefix prepended to the key. Set to an empty string for raw-key schemes (e.g. `x-api-key`, `api-key`).
+</ParamField>
+
+<ParamField body="Headers" type="object">
+  Static headers added to every upstream request.
+</ParamField>
+
+<ParamField body="QueryParams" type="object">
+  Static query-string parameters appended to the upstream URL (e.g. Azure OpenAI's `api-version`).
+</ParamField>
+
+## Command-line flags
+
+| Flag | Description |
+| --- | --- |
+| `--config <path>` | Path to the config file. A relative path is searched from the current directory upward, then next to the binary. If omitted, the connector looks for `appsettings.json`. A specified-but-missing file fails loudly. |
+| `--version` | Print the connector version and exit. Aliases: `--ver`, `-v`. |
+
+Any config value can also be overridden on the command line using its full key path:
+
+```bash
+tokios-connector --config tokios-connector.json --Logging:LogLevel:Default=Debug
+```
+
+<Note>
+  There is no `--log-level` flag. Set verbosity through the `Logging` section (below) or the `--Logging:LogLevel:Default=...` override shown above.
+</Note>
+
+## Logging
+
+The connector always logs to the console. Control verbosity and turn on optional rolling daily files with a top-level `Logging` section — a sibling of `Connector`:
+
+```json tokios-connector.json
+{
+  "Logging": {
+    "LogLevel": { "Default": "Information" },
+    "Directory": "logs",
+    "RetainedDays": 7
+  },
+  "Connector": {
+    "ConnectorId": "con_...",
+    "Token": "ct-...",
+    "Models": ["gemma4:e4b"],
+    "Upstream": { "BaseUrl": "http://127.0.0.1:11434/v1" }
+  }
+}
+```
+
+<ParamField body="Logging:LogLevel:Default" default="Information" type="string">
+  Verbosity: `Trace`, `Debug`, `Information`, `Warning`, or `Error`. Set to `Debug` to capture per-request routing, the `cid`, and upstream detail when troubleshooting.
+</ParamField>
+
+<ParamField body="Logging:Directory" type="string">
+  Turn on rolling daily log files in this directory (created if missing). Empty (the default) means console only. A **relative** path resolves next to the connector binary — not the working directory — so logs land predictably even when the connector is launched by double-click.
+</ParamField>
+
+<ParamField body="Logging:RetainedDays" default="14" type="integer">
+  Number of daily log files to keep.
+</ParamField>
+
+This writes `logs/tokios-connector-YYYYMMDD.log`.
+
+## Running as a background service
+
+<Tip>
+  For development, running in a terminal window is fine. For always-on use, run the connector as a system service so it restarts automatically on reboot.
+</Tip>
+
+<Tabs>
+  <Tab title="macOS (launchd)">
+    Create a plist file at `~/Library/LaunchAgents/com.tokios.connector.plist`:
+
+    ```xml ~/Library/LaunchAgents/com.tokios.connector.plist
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+      "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+    <dict>
+      <key>Label</key>
+      <string>com.tokios.connector</string>
+      <key>ProgramArguments</key>
+      <array>
+        <string>/usr/local/bin/tokios-connector</string>
+        <string>--config</string>
+        <string>/etc/tokios/tokios-connector.json</string>
+      </array>
+      <key>RunAtLoad</key>
+      <true/>
+      <key>KeepAlive</key>
+      <true/>
+      <key>StandardOutPath</key>
+      <string>/var/log/tokios-connector.log</string>
+      <key>StandardErrorPath</key>
+      <string>/var/log/tokios-connector.log</string>
+    </dict>
+    </plist>
+    ```
+
+    Load and start the service:
+
+    ```bash
+    launchctl load ~/Library/LaunchAgents/com.tokios.connector.plist
+    launchctl start com.tokios.connector
+    ```
+  </Tab>
+  <Tab title="Linux (systemd)">
+    Create a unit file at `/etc/systemd/system/tokios-connector.service`:
+
+    ```ini /etc/systemd/system/tokios-connector.service
+    [Unit]
+    Description=Tokios Connector
+    After=network.target
+    
+    [Service]
+    ExecStart=/usr/local/bin/tokios-connector --config /etc/tokios/tokios-connector.json
+    Restart=always
+    RestartSec=5
+    StandardOutput=journal
+    StandardError=journal
+    
+    [Install]
+    WantedBy=multi-user.target
+    ```
+
+    Enable and start the service:
+
+    ```bash
+    sudo systemctl daemon-reload
+    sudo systemctl enable tokios-connector
+    sudo systemctl start tokios-connector
+    ```
+  </Tab>
+  <Tab title="Windows (Service)">
+    On Windows, use [NSSM (Non-Sucking Service Manager)](https://nssm.cc/) or Task Scheduler to run the connector as a background service.
+
+    **Using NSSM:**
+
+    ```powershell
+    nssm install TokiosConnector "C:\Program Files\Tokios\tokios-connector.exe"
+    nssm set TokiosConnector AppParameters "--config C:\ProgramData\Tokios\tokios-connector.json"
+    nssm set TokiosConnector Start SERVICE_AUTO_START
+    nssm start TokiosConnector
+    ```
+
+    **Using Task Scheduler:**
+
+    Create a new task, set the trigger to **At startup**, and point the action at `tokios-connector.exe` with `--config <path>` as the argument. Enable **Run whether user is logged on or not** to keep it running in the background.
+  </Tab>
+</Tabs>

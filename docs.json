@@ -1,0 +1,80 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "luma",
+  "name": "Tokios",
+  "colors": {
+    "primary": "#6366F1",
+    "light": "#818CF8",
+    "dark": "#4F46E5"
+  },
+  "favicon": {
+    "light": "/images/tokios-icon.svg",
+    "dark": "/images/tokios-icon.svg"
+  },
+  "logo": {
+    "light": "/images/tokios-logo-onlight.svg",
+    "dark": "/images/tokios-logo.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Support",
+        "href": "https://tokios.com/contactus"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Sign Up Free",
+      "href": "https://tokios.com"
+    }
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "index",
+              "quickstart",
+              "how-it-works"
+            ]
+          },
+          {
+            "group": "Setup",
+            "pages": [
+              "setup/connector-install",
+              "setup/supported-backends",
+              "setup/register-model",
+              "setup/api-keys"
+            ]
+          },
+          {
+            "group": "Using Tokios",
+            "pages": [
+              "guides/claude-code",
+              "guides/openai-codex",
+              "guides/compatible-clients",
+              "guides/model-routing"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "reference/api-endpoints",
+              "reference/connector-config",
+              "reference/faq"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "footer": {
+    "socials": {
+      "x": "https://x.com/TokiosAI"
+    }
+  },
+  "description": "Tokios Documentation"
+}

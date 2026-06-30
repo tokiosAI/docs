@@ -1,0 +1,153 @@
+---
+title: "Download, Install, and Configure the Tokios Connector"
+sidebarTitle: "Connector Install"
+description: "Download the tokios-connector binary, drop your ConnectorId and Token from the dashboard into tokios-connector.json, and open your outbound tunnel in minutes."
+---
+
+The Tokios Connector is a small console app that opens a secure outbound WebSocket to the Tokios gateway and forwards requests to your local model. Install it on the machine running your model — no inbound firewall rules required.
+
+## 1. Create a connector in the dashboard
+
+In the Tokios dashboard, create a connector. You'll get a **`ConnectorId`** and a **`Token`** — the token is shown only once, so copy it now.
+
+## 2. Download the binary
+
+Download `tokios-connector` for your platform from the dashboard's **Downloads** page.
+
+<Tabs>
+  <Tab title="Windows">
+    **Supported:** Windows 10 & 11 (x64)
+
+    Download `tokios-connector.exe` and place it in a directory of your choice — for example, `C:\tokios\`.
+  </Tab>
+  <Tab title="macOS">
+    **Supported:** Apple Silicon (arm64)
+
+    Download `tokios-connector` and place it in a directory of your choice — for example, `~/tokios/`. Make it executable:
+
+    ```bash
+    chmod +x tokios-connector
+    ```
+  </Tab>
+  <Tab title="Linux">
+    **Supported:** Linux (x64)
+
+    Download `tokios-connector` and place it in a directory of your choice — for example, `~/tokios/` or `/usr/local/bin/`. Make it executable:
+
+    ```bash
+    chmod +x tokios-connector
+    ```
+  </Tab>
+</Tabs>
+
+## 3. Create the config file
+
+Next to the binary, create `tokios-connector.json` with your `ConnectorId` and `Token`, the model id your local server serves, and its URL:
+
+```json tokios-connector.json
+{
+  "Connector": {
+    "ConnectorId": "con_your_connector_id",
+    "Token": "ct-your-connector-token",
+    "Models": ["gemma4:e4b"],
+    "Upstream": {
+      "BaseUrl": "http://127.0.0.1:11434/v1"
+    }
+  }
+}
+```
+
+`BaseUrl` must include the `/v1` segment and point at your model server. The default above is Ollama — see [Backends](/setup/supported-backends) for llama.cpp, vLLM, and LM Studio, and [Connector Config](/reference/connector-config) for every option.
+
+## 4. Run the connector
+
+<CodeGroup>
+
+```bash macOS / Linux
+./tokios-connector --config tokios-connector.json
+```
+
+```powershell Windows
+tokios-connector.exe --config tokios-connector.json
+```
+
+</CodeGroup>
+
+The connector prints `Loaded connector config from: ...` and dials the gateway. Once it's connected it holds a single outbound WebSocket — no inbound ports were opened on your machine.
+
+<Note>
+  The connector never listens on a port; it only dials out, so your firewall needs no changes.
+</Note>
+
+In the Tokios dashboard, create a connector. You'll get a **`ConnectorId`** and a **`Token`** — the token is shown only once, so copy it now.
+
+## 2. Download the binary
+
+Download `tokios-connector` for your platform from the dashboard's **Downloads** page.
+
+<Tabs>
+  <Tab title="Windows">
+    **Supported:** Windows 10 & 11 (x64)
+
+    Download `tokios-connector.exe` and place it in a directory of your choice — for example, `C:\tokios\`.
+  </Tab>
+  <Tab title="macOS">
+    **Supported:** Apple Silicon (arm64)
+
+    Download `tokios-connector` and place it in a directory of your choice — for example, `~/tokios/`. Make it executable:
+
+    ```bash
+    chmod +x tokios-connector
+    ```
+  </Tab>
+  <Tab title="Linux">
+    **Supported:** Linux (x64)
+
+    Download `tokios-connector` and place it in a directory of your choice — for example, `~/tokios/` or `/usr/local/bin/`. Make it executable:
+
+    ```bash
+    chmod +x tokios-connector
+    ```
+  </Tab>
+</Tabs>
+
+## 3. Create the config file
+
+Next to the binary, create `tokios-connector.json` with your `ConnectorId` and `Token`, the model id your local server serves, and its URL:
+
+```json tokios-connector.json
+{
+  "Connector": {
+    "ConnectorId": "con_your_connector_id",
+    "Token": "ct-your-connector-token",
+    "Models": ["gemma4:e4b"],
+    "Upstream": {
+      "BaseUrl": "http://127.0.0.1:11434/v1"
+    }
+  }
+}
+```
+
+`BaseUrl` must include the `/v1` segment and point at your model server. The default above is Ollama — see [Backends](/setup/supported-backends) for llama.cpp, vLLM, and LM Studio, and [Connector Config](/reference/connector-config) for every option.
+
+## 4. Run the connector
+
+<CodeGroup>
+
+```bash macOS / Linux
+./tokios-connector --config tokios-connector.json
+```
+
+```powershell Windows
+tokios-connector.exe --config tokios-connector.json
+```
+
+</CodeGroup>
+
+The connector prints `Loaded connector config from: ...` and dials the gateway. Once it's connected it holds a single outbound WebSocket — no inbound ports were opened on your machine.
+
+<Note>
+  The connector never listens on a port; it only dials out, so your firewall needs no changes.
+</Note>
+
+Once it's running, [register your model](/setup/register-model) as a deployment and [create an API key](/setup/api-keys).

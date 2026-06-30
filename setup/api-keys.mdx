@@ -1,0 +1,71 @@
+---
+title: "Tokios API Keys: Create, Use, and Revoke Bearer Tokens"
+sidebarTitle: "API Keys"
+description: "Generate tenant-scoped API keys for authenticating requests to api.tokios.com. Keys start with sk-tokios- and are passed as Bearer tokens."
+---
+
+Every request to `api.tokios.com` must include a Tokios API key as a Bearer token. Keys are tenant-scoped — they authenticate to your account and can only reach models you've registered. API keys are free to create and require no credit card.
+
+## Creating a Key
+
+1. Open your [Tokios dashboard](https://tokios.com/dashboard).
+2. Navigate to **API Keys** in the sidebar.
+3. Click **New Key**.
+4. Give the key a descriptive label (e.g. `production-app`, `local-dev`, `ci-pipeline`).
+5. Click **Create**, then **copy the key immediately** — it is shown only once.
+
+<Warning>
+  API keys are shown only once at creation. Store them in a password manager or secrets vault immediately. If you lose the key, you'll need to revoke it and create a new one.
+</Warning>
+
+## Using Your Key
+
+Include your key as a `Bearer` token in the `Authorization` header of every request:
+
+```bash
+Authorization: Bearer sk-tokios-YOUR_KEY_HERE
+```
+
+### Example: Chat completions with curl
+
+```bash
+curl https://api.tokios.com/v1/chat/completions \
+  -H "Authorization: Bearer sk-tokios-YOUR_KEY_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "gemma-tunnel", "messages": [{"role": "user", "content": "Hello"}]}'
+```
+
+Because the Tokios API is OpenAI- and Anthropic-compatible, you can also plug your key directly into any SDK that accepts a custom base URL:
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-tokios-YOUR_KEY_HERE",
+    base_url="https://api.tokios.com/v1",
+)
+
+response = client.chat.completions.create(
+    model="gemma-tunnel",
+    messages=[{"role": "user", "content": "Hello"}],
+)
+```
+
+## Key Security
+
+Follow these practices to keep your keys safe:
+
+- **Never commit keys to source control.** Treat them like passwords — keep them out of `.env` files that get checked in, `git config`, or hardcoded strings in your code.
+- **Use environment variables.** Store keys in your environment (e.g. `TOKIOS_API_KEY`) and read them at runtime rather than embedding them in your application.
+- **Rotate keys periodically.** Create a replacement key, update your services, then revoke the old one.
+- **Delete keys you no longer use.** Stale keys are an unnecessary attack surface. Revoke them as soon as they're no longer needed.
+- **Use separate keys per environment.** Give your development, staging, and production environments their own keys so you can revoke one without disrupting the others.
+
+## Revoking a Key
+
+1. Open your [Tokios dashboard](https://tokios.com/dashboard).
+2. Navigate to **API Keys**.
+3. Find the key you want to remove.
+4. Click **Revoke**.
+
+Revocation is immediate — any request using that key will be rejected with a `401 Unauthorized` response from that moment on.

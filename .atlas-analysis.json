@@ -1,0 +1,70 @@
+{
+  "projectType": "saas",
+  "projectName": "Tokios",
+  "projectDescription": "Tokios is an outbound-tunnel gateway that puts your private local models behind a single OpenAI- and Anthropic-compatible API endpoint, with no inbound ports or public IP required.",
+  "theme": "luma",
+  "primaryColor": "#6366F1",
+  "lightColor": "#818CF8",
+  "darkColor": "#4F46E5",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "how-it-works"
+            ]
+          },
+          {
+            "group": "Setup",
+            "pages": [
+              "setup/connector-install",
+              "setup/supported-backends",
+              "setup/register-model",
+              "setup/api-keys"
+            ]
+          },
+          {
+            "group": "Using Tokios",
+            "pages": [
+              "guides/claude-code",
+              "guides/openai-codex",
+              "guides/compatible-clients",
+              "guides/model-routing"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "reference/api-endpoints",
+              "reference/connector-config",
+              "reference/faq"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Outbound-only WebSocket tunnel — no inbound ports, no public IP required",
+    "OpenAI-compatible endpoint (/v1/chat/completions, /v1/responses)",
+    "Anthropic-compatible endpoint (/v1/messages)",
+    "Single stable URL for all local model deployments",
+    "Works with Ollama, llama.cpp, vLLM, and LM Studio",
+    "Tenant-scoped API keys for secure access",
+    "Native support for Claude Code and OpenAI Codex coding agents",
+    "Free community tier — no credit card required"
+  ],
+  "publicApiSurface": [
+    "POST /v1/chat/completions — OpenAI-compatible chat completions",
+    "POST /v1/messages — Anthropic-compatible messages",
+    "POST /v1/responses — OpenAI responses API",
+    "tokios-connector CLI — pairs your local model with the Tokios gateway",
+    "API key: sk-tokios-... — tenant-scoped authentication key",
+    "ANTHROPIC_BASE_URL / OPENAI_BASE_URL environment variable overrides"
+  ]
+}

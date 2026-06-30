@@ -1,0 +1,46 @@
+---
+title: "Tokios: Private Local Models Behind One API Endpoint"
+sidebarTitle: "Introduction"
+description: "Tokios tunnels requests to your local LLMs through an outbound-only WebSocket, exposing them via a single OpenAI- and Anthropic-compatible API endpoint."
+---
+
+Tokios connects your private local models — running on Ollama, llama.cpp, vLLM, or LM Studio — to a stable, cloud-reachable API endpoint at `api.tokios.com`. The connector on your machine dials out over a secure WebSocket; no inbound ports, no public IP, and no NAT configuration required. Point Claude Code, OpenAI Codex, or any OpenAI/Anthropic-compatible client at Tokios and your models become remotely accessible without ever leaving your hardware.
+
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Sign up, install the connector, and make your first API call in minutes.
+  </Card>
+
+  <Card title="How It Works" icon="diagram-project" href="/how-it-works">
+    Understand the outbound tunnel architecture and request flow.
+  </Card>
+
+  <Card title="Claude Code" icon="robot" href="/guides/claude-code">
+    Point Claude Code at your own models with two environment variables.
+  </Card>
+
+  <Card title="API Endpoints" icon="code" href="/reference/api-endpoints">
+    Full reference for OpenAI- and Anthropic-compatible surfaces.
+  </Card>
+</CardGroup>
+
+## Get running in three steps
+
+<Steps>
+  <Step title="Sign up and install the connector">
+    Create a free Tokios account, then download and run the connector next to your local model. The connector opens a single outbound WebSocket — nothing else is exposed on your network.
+  </Step>
+  <Step title="Register your model and get an API key">
+    In the Tokios dashboard, pair the connector, register your model deployment, and generate a tenant-scoped API key (`sk-tokios-...`).
+  </Step>
+  <Step title="Point your coding agent at Tokios">
+    Set `ANTHROPIC_BASE_URL` or `OPENAI_BASE_URL` to `https://api.tokios.com` and your API key. Your agent now calls your local model through the Tokios endpoint.
+  </Step>
+  <Step title="Point your coding agent at Tokios">
+    Point Claude Code, OpenAI Codex, or any OpenAI/Anthropic-compatible client at `https://api.tokios.com` with your API key. Your agent now calls your local model through the Tokios endpoint.
+  </Step>
+</Steps>
+
+<Note>
+  Tokios is free to try with no credit card required. The community tier gives you access to the full feature set so you can use it with your own hardware.
+</Note>
