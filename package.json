@@ -1,0 +1,12 @@
+{
+  "name": "tokios-docs",
+  "private": true,
+  "scripts": {
+    "dev": "mint dev",
+    "validate": "mint validate",
+    "check": "mint broken-links"
+  },
+  "devDependencies": {
+    "mint": "4.2.651"
+  }
+}

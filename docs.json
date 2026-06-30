@@ -3,9 +3,38 @@
   "theme": "luma",
   "name": "Tokios",
   "colors": {
-    "primary": "#6366F1",
-    "light": "#818CF8",
-    "dark": "#4F46E5"
+    "primary": "#F2A23C",
+    "light": "#F2A23C",
+    "dark": "#E0892A"
+  },
+  "appearance": {
+    "default": "dark",
+    "strict": false
+  },
+  "fonts": {
+    "heading": {
+      "family": "Space Grotesk",
+      "weight": 600
+    },
+    "body": {
+      "family": "IBM Plex Sans",
+      "weight": 400
+    }
+  },
+  "background": {
+    "color": {
+      "light": "#F4F5F7",
+      "dark": "#0E1116"
+    }
+  },
+  "styling": {
+    "eyebrows": "breadcrumbs",
+    "codeblocks": {
+      "theme": {
+        "light": "github-light",
+        "dark": "css-variables"
+      }
+    }
   },
   "favicon": {
     "light": "/images/tokios-icon.svg",
@@ -25,7 +54,7 @@
     "primary": {
       "type": "button",
       "label": "Sign Up Free",
-      "href": "https://tokios.com"
+      "href": "https://tokios.com/signup"
     }
   },
   "navigation": {

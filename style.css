@@ -1,0 +1,208 @@
+:root {
+  --tokios-ink: #0e1116;
+  --tokios-ink-2: #0a0d12;
+  --tokios-surface: #161b22;
+  --tokios-line: #262e38;
+  --tokios-text: #e7ebf1;
+  --tokios-muted: #99a3b2;
+  --tokios-amber: #f2a23c;
+  --tokios-amber-deep: #e0892a;
+  --tokios-teal: #4fd6c2;
+
+  --mint-color-background: var(--tokios-ink);
+  --mint-color-text: var(--tokios-text);
+  --mint-token-constant: var(--tokios-teal);
+  --mint-token-string: var(--tokios-amber);
+  --mint-token-comment: #6a7280;
+  --mint-token-keyword: var(--tokios-teal);
+  --mint-token-parameter: #e7ebf1;
+  --mint-token-function: var(--tokios-amber);
+  --mint-token-string-expression: var(--tokios-amber);
+  --mint-token-punctuation: #99a3b2;
+  --mint-token-link: var(--tokios-teal);
+}
+
+code,
+pre,
+kbd,
+samp {
+  font-family: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+::selection {
+  background: var(--tokios-amber);
+  color: #1a1205;
+}
+
+/* ----------------------------------------------------------------
+   Docs readability
+   Mintlify renders body copy through Tailwind Typography
+   (.prose / .dark:prose-invert). Its default invert body color is a
+   dim warm gray (~#A5A3A0) that reads as low-contrast "secondary"
+   text and ignores --mint-color-text. Lift body + heading colors
+   toward the brand's light ink so long-form docs are comfortable to
+   read, and relax line-height. Muted #99A3B2 stays for captions.
+   Tailwind Typography styles via zero-specificity :where(), so the
+   direct selectors below win cleanly without !important.
+------------------------------------------------------------------ */
+.prose {
+  --tw-prose-invert-body: #d8dee8;
+  --tw-prose-invert-headings: #f3f5f9;
+  --tw-prose-invert-lead: #c6cdd9;
+  --tw-prose-invert-bold: #ffffff;
+  --tw-prose-invert-links: var(--tokios-amber);
+  --tw-prose-invert-bullets: var(--tokios-amber);
+  --tw-prose-invert-counters: var(--tokios-muted);
+  --tw-prose-invert-quotes: #d8dee8;
+  --tw-prose-invert-quote-borders: var(--tokios-amber);
+  --tw-prose-invert-captions: var(--tokios-muted);
+  --tw-prose-invert-hr: var(--tokios-line);
+}
+
+.prose p,
+.prose li,
+.prose td,
+.prose blockquote {
+  color: #d8dee8;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+  color: #f3f5f9;
+}
+
+.prose p,
+.prose li {
+  line-height: 1.7;
+}
+
+.prose strong {
+  color: #ffffff;
+}
+
+/* ----------------------------------------------------------------
+   Sidebar legibility
+   Inactive nav links render at a dim warm gray (~#A5A3A0). Lift them
+   to a readable light gray; the active item (aria-current="page")
+   keeps its amber, and hover goes bright.
+------------------------------------------------------------------ */
+#navigation-items a:not([aria-current="page"]) {
+  color: #cdd5df;
+}
+
+#navigation-items a:not([aria-current="page"]):hover {
+  color: #f3f5f9;
+}
+
+/* ----------------------------------------------------------------
+   Header height
+   Match the marketing site's taller header (~64px) instead of
+   Mintlify's default 48px (h-12). The header is sticky and in normal
+   flow, so a taller bar simply pushes content down. !important is
+   needed to beat Tailwind's utility class. Bump heading scroll-margin
+   so in-page anchor links clear the taller bar.
+------------------------------------------------------------------ */
+header.top-0.w-full {
+  height: 64px !important;
+  min-height: 64px !important;
+}
+
+.prose :where(h1, h2, h3, h4)[id] {
+  scroll-margin-top: 84px;
+}
+
+/* ----------------------------------------------------------------
+   Table of contents: keep it pinned correctly
+   The header is now 64px (raised from Mintlify's 48px), so the TOC's
+   default sticky offset (top:48px) slid under the header. Re-pin it
+   below the header and keep the column at its natural height — when it
+   gets stretched to full height it behaves like an over-tall sticky
+   element and drifts up/down on scroll. Long TOCs scroll internally.
+------------------------------------------------------------------ */
+div:has(> [class*="max-w-[696px]"]) + * {
+  top: 80px !important;
+  align-self: flex-start !important;
+  height: fit-content !important;
+  max-height: calc(100vh - 96px) !important;
+  overflow-y: auto !important;
+}
+
+/* ----------------------------------------------------------------
+   Layout: center the content + TOC as a cohesive block (wide screens)
+   By default Mintlify/Luma lets the content area grow to full width and
+   centers the article inside it with lg:mx-auto, while the TOC is pinned
+   to the far-right edge — so on a wide monitor the article drifts and a
+   big gap opens up to the TOC. On screens >= 1440px we instead give the
+   content area a fixed readable width, neutralize the article's auto
+   margins, and use flex auto-margins to center the [content + TOC] pair
+   in the space after the sidebar. The reading column then sits near the
+   viewport centre with the TOC right beside it (like GitBook/DeepWiki).
+   Scoped to >= 1440px so narrower screens keep Mintlify's default layout.
+------------------------------------------------------------------ */
+@media (min-width: 1440px) {
+  /* content area — fixed width, pushed toward the centre */
+  div:has(> [class*="max-w-[696px]"]) {
+    flex: 0 0 auto !important;
+    width: 784px !important;
+    max-width: 784px !important;
+    margin-left: auto !important;
+  }
+
+  /* article — drop lg:mx-auto so it fills the content area */
+  [class*="max-w-[696px]"] {
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  /* table of contents (the sibling after the content area) closes the pair */
+  div:has(> [class*="max-w-[696px]"]) + * {
+    margin-right: auto !important;
+  }
+}
+
+/* ----------------------------------------------------------------
+   Center the whole page as one band (wide screens)
+   The rules above already center the content + TOC. To bring the rest
+   of the page in to match: (1) slide the position:fixed sidebar inward
+   so it sits just left of the centered content, and (2) center the
+   header's content row on the same band so the logo lines up with the
+   sidebar. We deliberately do NOT pad the main content column — Luma
+   sizes the article via container queries, and padding it reintroduces
+   a phantom offset that shrinks the article and squashes the TOC.
+   max(...,0px) makes both no-ops below ~1360px, so narrow screens keep
+   the default layout.
+------------------------------------------------------------------ */
+:root {
+  --tok-band-inset: max((100vw - 1360px) / 2, 0px);
+}
+
+/* fixed sidebar — slide it in beside the centered content */
+.fixed.w-56 {
+  left: var(--tok-band-inset) !important;
+}
+
+/* header content row — center it so the logo aligns with the sidebar */
+header.top-0.w-full > .relative {
+  max-width: 1360px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* ----------------------------------------------------------------
+   Desktop polish
+   - Extra top padding so the sidebar nav clears the 64px header with
+     breathing room (its default offset slid under the taller header).
+   - Slightly larger body copy for comfortable reading on desktop.
+------------------------------------------------------------------ */
+@media (min-width: 1024px) {
+  #navigation-items {
+    padding-top: 48px !important;
+  }
+
+  .prose {
+    font-size: 17px !important;
+  }
+}
