@@ -17,50 +17,55 @@ hard way.
 - **Table of contents** — re-pinned to `top: 80px` (clears the 64px header; the default
   48px slid under it) and forced to `height: fit-content`. When the TOC column gets
   stretched full-height it behaves like an over-tall sticky element and drifts on scroll.
-- **Centering** — see below.
+- **Content width** — see below.
 
-## How the centering works (and why it's done this way)
+## Content width & the Assistant constraint
 
-The visual goal: the whole page (sidebar · content · TOC · header) reads as one
-centered band on wide monitors, like GitBook/DeepWiki or x.com.
+We do **not** own the theme's markup, so styling is a CSS override layer on top of
+Mintlify's **Luma** theme. The article has a stable `id="content-area"` — prefer that
+over class selectors.
 
-We do **not** own the theme's markup, so this is a CSS override layer on top of
-Mintlify's **Luma** theme. Two theme choices shape the approach:
+Current approach (deliberately minimal/robust): widen the article via
+`#content-area { max-width: 768px }` and let the theme's own `lg:mx-auto` center it
+inside the content column. We do **not** touch the layout flex, the sidebar position,
+or the header.
 
-1. **The sidebar is `position: fixed`** (pinned to the viewport's left edge). It is not
-   a flex column, so it can't be centered by capping a container — it's moved by setting
-   its `left`.
-2. **The content/article is sized by CSS container queries.** Any attempt to cap or pad
-   the content column reintroduces a phantom horizontal offset (~708px at full width,
-   ~224px inside a band) that shrinks the article and squashes the TOC. **Do not pad the
-   main content column.**
+### Why not a fancier centered "band"?
 
-So the implementation is:
+An earlier version pulled the `position: fixed` sidebar inward (`left: calc(...)`),
+centered the `[content + TOC]` pair with flex auto-margins, and centered the header row
+— making the whole page a centered band. It looked great on `mint dev`, but **broke on
+the live site when the "Ask Assistant" panel opens**:
 
-- **Content + TOC** (`@media (min-width: 1440px)`): give the content column a fixed
-  `width: 784px`, neutralize the article's `lg:mx-auto`, and center the
-  `[content + TOC]` pair with flex auto-margins. The article must have a fixed-width
-  parent or the container queries collapse it.
-- **Whole-page band** (`--tok-band-inset: max((100vw - 1360px)/2, 0px)`): slide the
-  fixed sidebar in with `left: var(--tok-band-inset)`, and center the header's content
-  row with `max-width: 1360px; margin-inline: auto`. The content itself is left
-  untouched (that's what avoids the phantom offset). `max(..., 0px)` makes everything a
-  no-op below ~1360px, so narrow screens keep Mintlify's default layout.
+- The Assistant panel shrinks the layout and collapses the right TOC to width 0.
+- With no TOC to balance against, the content's `margin-left: auto` shoved it under the
+  panel, and the `100vw`-positioned fixed sidebar then overlapped it.
+- `mint dev` has no Assistant, so the breakage was invisible locally.
+
+There's no DOM signal that flips when the Assistant opens (no `aria-expanded` /
+`data-state` on `#assistant-entry`), and the layout row has no unique selector, so the
+band couldn't be made to stand down automatically. Hence the minimal approach above —
+the theme's native layout adapts to the Assistant correctly.
+
+Two Luma gotchas worth remembering if you revisit this:
+
+1. **The sidebar is `position: fixed`** — it can't be centered by capping a container.
+2. **The article is sized by CSS container queries** — capping/padding the content
+   column reintroduces a phantom offset (~708px) that shrinks it and squashes the TOC.
 
 ### Magic numbers
 - `64px` — header height
-- `784px` — content column width
-- `1440px` — breakpoint where content+TOC centering kicks in
-- `1360px` — band width the sidebar + header center against
-- `80px` / `calc(100vh - 96px)` — TOC sticky offset + max height
+- `768px` — article max-width (widened from Mintlify's 696px)
+- `80px` / `calc(100vh - 96px)` — TOC sticky offset (clears the 64px header) + max height
 - `1024px` — desktop breakpoint for sidebar top padding + larger body font
 - `48px` — sidebar nav top padding (clears the 64px header)
 - `17px` — desktop body font size
 
 ### Fragility
-The selectors target Mintlify's generated utility classes (`[class*="max-w-[696px]"]`,
-`.fixed.w-56`, `header.top-0.w-full`, `#navigation-items`). A Mintlify version bump can
-rename these — **re-verify the layout after upgrading Mintlify.**
+The selectors target Mintlify's generated ids/classes (`#content-area`,
+`header.top-0.w-full`, `#navigation-items`, and `div:has(> #content-area)` for the TOC
+sibling). A Mintlify version bump can rename these — **re-verify after upgrading
+Mintlify, and always check both states: Assistant closed AND open.**
 
 ## The cleaner approach for the future (x.com style)
 
