@@ -24,6 +24,10 @@ Mintlify does not add render-blocking Google Fonts stylesheet requests. `style.c
 adds the local italic body face because the `docs.json` body font config supports one
 source file.
 
+LaTeX styles are disabled with `styling.latex: false` because these docs do not use
+math notation. Keep it off unless a page needs LaTeX; otherwise Mintlify can load
+extra Latin Modern font CSS.
+
 ## Content width & the centered band (with the Assistant)
 
 We do **not** own the theme's markup, so styling is a CSS override layer on top of

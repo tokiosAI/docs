@@ -33,6 +33,7 @@
   },
   "styling": {
     "eyebrows": "breadcrumbs",
+    "latex": false,
     "codeblocks": {
       "theme": {
         "light": "github-light",
