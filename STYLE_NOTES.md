@@ -57,18 +57,21 @@ Two Luma gotchas worth remembering:
    That's why the band uses a fixed-width content column instead of padding.
 
 ### Magic numbers
-- `64px` — header height
-- `768px` — article max-width (widened from Mintlify's 696px)
+- `64px` — header height (`#navbar`)
+- `1360px` — band width the sidebar/header center against (`--tok-band-inset`)
+- `784px` — content-column width for the ≥1440px band; `768px` — article width otherwise
 - `80px` / `calc(100vh - 96px)` — TOC sticky offset (clears the 64px header) + max height
 - `1024px` — desktop breakpoint for sidebar top padding + larger body font
 - `48px` — sidebar nav top padding (clears the 64px header)
 - `17px` — desktop body font size
 
 ### Fragility
-The selectors target Mintlify's generated ids/classes (`#content-area`,
-`header.top-0.w-full`, `#navigation-items`, and `div:has(> #content-area)` for the TOC
-sibling). A Mintlify version bump can rename these — **re-verify after upgrading
-Mintlify, and always check both states: Assistant closed AND open.**
+The band is built on Mintlify's documented ids (`#navbar`, `#sidebar-content`,
+`#content-area`) plus `div:has(> #content-area)` for the content column / TOC sibling,
+`#navigation-items` for the sidebar links, and `#chat-assistant-sheet` for the Assistant
+signal in `assistant-state.js`. A Mintlify version bump can rename or restructure these
+— **re-verify after upgrading Mintlify, and always check both states: Assistant closed
+AND open.** Custom JS/CSS is loaded from any `.js` / `.css` file in the repo root.
 
 ## The cleaner approach for the future (x.com style)
 
