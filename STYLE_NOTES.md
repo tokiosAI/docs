@@ -19,39 +19,42 @@ hard way.
   stretched full-height it behaves like an over-tall sticky element and drifts on scroll.
 - **Content width** — see below.
 
-## Content width & the Assistant constraint
+## Content width & the centered band (with the Assistant)
 
 We do **not** own the theme's markup, so styling is a CSS override layer on top of
-Mintlify's **Luma** theme. The article has a stable `id="content-area"` — prefer that
-over class selectors.
+Mintlify's **Luma** theme. Prefer the documented stable ids (`#navbar`,
+`#sidebar-content`, `#content-area`, `#chat-assistant-sheet`) over class selectors.
 
-Current approach (deliberately minimal/robust): widen the article via
-`#content-area { max-width: 768px }` and let the theme's own `lg:mx-auto` center it
-inside the content column. We do **not** touch the layout flex, the sidebar position,
-or the header.
+**The layout is a centered band while the Assistant is closed, and the theme's native
+layout while it's open.** The two pieces:
 
-### Why not a fancier centered "band"?
+- `assistant-state.js` (a repo-root JS file Mintlify runs on every page) watches
+  `#chat-assistant-sheet` with a `MutationObserver` and toggles an `assistant-open`
+  class on `<html>` from the panel's width (0 = closed, wide = open).
+- Every band rule in `style.css` is scoped with `html:not(.assistant-open)`, so it
+  applies only while the Assistant is closed. The band: slide the fixed sidebar in
+  (`#sidebar-content { left: var(--tok-band-inset) }`), center the navbar's content row
+  (`#navbar > .relative`), and center the `[content + TOC]` pair on ≥1440px screens
+  (fixed-width content column + flex auto-margins).
+- The instant the Assistant opens, the class flips and every band rule drops out, so the
+  theme's native (Assistant-safe) layout takes over — no more content shoved sideways.
 
-An earlier version pulled the `position: fixed` sidebar inward (`left: calc(...)`),
-centered the `[content + TOC]` pair with flex auto-margins, and centered the header row
-— making the whole page a centered band. It looked great on `mint dev`, but **broke on
-the live site when the "Ask Assistant" panel opens**:
+### Why the band needs the JS signal
 
-- The Assistant panel shrinks the layout and collapses the right TOC to width 0.
-- With no TOC to balance against, the content's `margin-left: auto` shoved it under the
-  panel, and the `100vw`-positioned fixed sidebar then overlapped it.
-- `mint dev` has no Assistant, so the breakage was invisible locally.
+The band **broke** on the live site when the Assistant opened: the panel shrinks the
+layout and collapses the TOC to width 0, so the content's `margin-left: auto` had
+nothing to balance and shoved the content under the panel, and the `100vw`-positioned
+fixed sidebar overlapped it. There is no native DOM signal for "Assistant open" (no
+`aria-expanded` / `data-state` on `#assistant-entry`), so `assistant-state.js` creates
+one. `mint dev` has no Assistant, so `assistant-open` is never set there and the band
+always applies locally.
 
-There's no DOM signal that flips when the Assistant opens (no `aria-expanded` /
-`data-state` on `#assistant-entry`), and the layout row has no unique selector, so the
-band couldn't be made to stand down automatically. Hence the minimal approach above —
-the theme's native layout adapts to the Assistant correctly.
+Two Luma gotchas worth remembering:
 
-Two Luma gotchas worth remembering if you revisit this:
-
-1. **The sidebar is `position: fixed`** — it can't be centered by capping a container.
+1. **The sidebar is `position: fixed`** — move it with `left`, not by capping a container.
 2. **The article is sized by CSS container queries** — capping/padding the content
    column reintroduces a phantom offset (~708px) that shrinks it and squashes the TOC.
+   That's why the band uses a fixed-width content column instead of padding.
 
 ### Magic numbers
 - `64px` — header height

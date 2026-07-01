@@ -20,6 +20,11 @@
   --mint-token-string-expression: var(--tokios-amber);
   --mint-token-punctuation: #99a3b2;
   --mint-token-link: var(--tokios-teal);
+
+  /* Band inset: equal side margin so the page centers on wide screens.
+     max(..., 0px) resolves to 0 below ~1360px, so narrow screens keep
+     Mintlify's default layout. */
+  --tok-band-inset: max((100vw - 1360px) / 2, 0px);
 }
 
 code,
@@ -104,7 +109,7 @@ samp {
    needed to beat Tailwind's utility class. Bump heading scroll-margin
    so in-page anchor links clear the taller bar.
 ------------------------------------------------------------------ */
-header.top-0.w-full {
+#navbar {
   height: 64px !important;
   min-height: 64px !important;
 }
@@ -130,23 +135,59 @@ div:has(> #content-area) + * {
 }
 
 /* ----------------------------------------------------------------
-   Content width
-   Widen the reading column past Mintlify's 696px default. We only set
-   max-width on the article (#content-area) and let the theme's own
-   lg:mx-auto center it inside the content column.
-
-   IMPORTANT — robustness with the Assistant panel:
-   An earlier version pulled the fixed sidebar inward and centered the
-   [content + TOC] pair with flex auto-margins to make the whole page a
-   centered band. That broke when the "Ask Assistant" panel opens: the
-   panel shrinks the layout and collapses the TOC, the auto-margins then
-   had nothing to balance against and shoved the content under the panel,
-   and the 100vw-positioned fixed sidebar overlapped it. So we DO NOT
-   touch the layout flex, the sidebar position, or the header here — the
-   theme's native layout handles the Assistant correctly. See STYLE_NOTES.md.
+   Content width (default / Assistant-open state)
+   Widen the reading column past Mintlify's 696px default; the theme's
+   lg:mx-auto centers it. The centered band below overrides this while
+   the Assistant is closed.
 ------------------------------------------------------------------ */
 #content-area {
   max-width: 768px !important;
+}
+
+/* ----------------------------------------------------------------
+   Centered band — applied ONLY while the Assistant is closed
+   assistant-state.js toggles `assistant-open` on <html> when the panel
+   (#chat-assistant-sheet) is visible. `html:not(.assistant-open)` scopes
+   every rule below, so the band stands down the instant the Assistant
+   opens and the theme's native (Assistant-safe) layout takes over — that
+   is what fixes the "content shoved sideways" bug.
+
+   When closed, the whole page reads as one centered band: the fixed
+   sidebar slides in, the navbar's content row centers so the logo lines
+   up with it, and the [content + TOC] pair is centered on wide screens.
+   Built on Mintlify's documented ids (#navbar, #sidebar-content,
+   #content-area). See STYLE_NOTES.md.
+------------------------------------------------------------------ */
+html:not(.assistant-open) #sidebar-content {
+  left: var(--tok-band-inset) !important;
+}
+
+html:not(.assistant-open) #navbar > .relative {
+  max-width: 1360px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+@media (min-width: 1440px) {
+  /* content column — fixed width, nudged toward the centre */
+  html:not(.assistant-open) div:has(> #content-area) {
+    flex: 0 0 auto !important;
+    width: 784px !important;
+    max-width: 784px !important;
+    margin-left: auto !important;
+  }
+
+  /* article fills the fixed content column */
+  html:not(.assistant-open) #content-area {
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  /* TOC balances the pair so it centres */
+  html:not(.assistant-open) div:has(> #content-area) + * {
+    margin-right: auto !important;
+  }
 }
 
 /* ----------------------------------------------------------------
