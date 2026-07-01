@@ -14,10 +14,14 @@
   "fonts": {
     "heading": {
       "family": "Space Grotesk",
+      "source": "/fonts/space-grotesk-600-latin.woff2",
+      "format": "woff2",
       "weight": 600
     },
     "body": {
       "family": "IBM Plex Sans",
+      "source": "/fonts/ibm-plex-sans-400-latin.woff2",
+      "format": "woff2",
       "weight": 400
     }
   },

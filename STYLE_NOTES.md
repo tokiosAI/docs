@@ -1,7 +1,7 @@
 # Styling & layout notes
 
 All visual customization lives in `style.css` (loaded automatically by Mintlify) and
-`docs.json` (theme tokens, fonts, logo, navbar). This file explains the non-obvious
+`docs.json` (theme tokens, local fonts, logo, navbar). This file explains the non-obvious
 parts — especially the layout centering — so the next person doesn't relearn it the
 hard way.
 
@@ -18,6 +18,11 @@ hard way.
   48px slid under it) and forced to `height: fit-content`. When the TOC column gets
   stretched full-height it behaves like an over-tall sticky element and drifts on scroll.
 - **Content width** — see below.
+
+Fonts are self-hosted from `/fonts` and referenced in `docs.json`. Keep that setup so
+Mintlify does not add render-blocking Google Fonts stylesheet requests. `style.css`
+adds the local italic body face because the `docs.json` body font config supports one
+source file.
 
 ## Content width & the centered band (with the Assistant)
 
