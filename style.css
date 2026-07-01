@@ -20,6 +20,11 @@
   --mint-token-string-expression: var(--tokios-amber);
   --mint-token-punctuation: #99a3b2;
   --mint-token-link: var(--tokios-teal);
+
+  /* Band inset: equal side margin so the page centers on wide screens.
+     max(..., 0px) resolves to 0 below ~1360px, so narrow screens keep
+     Mintlify's default layout. */
+  --tok-band-inset: max((100vw - 1360px) / 2, 0px);
 }
 
 code,
@@ -104,7 +109,7 @@ samp {
    needed to beat Tailwind's utility class. Bump heading scroll-margin
    so in-page anchor links clear the taller bar.
 ------------------------------------------------------------------ */
-header.top-0.w-full {
+#navbar {
   height: 64px !important;
   min-height: 64px !important;
 }
@@ -121,7 +126,7 @@ header.top-0.w-full {
    gets stretched to full height it behaves like an over-tall sticky
    element and drifts up/down on scroll. Long TOCs scroll internally.
 ------------------------------------------------------------------ */
-div:has(> [class*="max-w-[696px]"]) + * {
+div:has(> #content-area) + * {
   top: 80px !important;
   align-self: flex-start !important;
   height: fit-content !important;
@@ -130,65 +135,57 @@ div:has(> [class*="max-w-[696px]"]) + * {
 }
 
 /* ----------------------------------------------------------------
-   Layout: center the content + TOC as a cohesive block (wide screens)
-   By default Mintlify/Luma lets the content area grow to full width and
-   centers the article inside it with lg:mx-auto, while the TOC is pinned
-   to the far-right edge — so on a wide monitor the article drifts and a
-   big gap opens up to the TOC. On screens >= 1440px we instead give the
-   content area a fixed readable width, neutralize the article's auto
-   margins, and use flex auto-margins to center the [content + TOC] pair
-   in the space after the sidebar. The reading column then sits near the
-   viewport centre with the TOC right beside it (like GitBook/DeepWiki).
-   Scoped to >= 1440px so narrower screens keep Mintlify's default layout.
+   Content width (default / Assistant-open state)
+   Widen the reading column past Mintlify's 696px default; the theme's
+   lg:mx-auto centers it. The centered band below overrides this while
+   the Assistant is closed.
 ------------------------------------------------------------------ */
+#content-area {
+  max-width: 768px !important;
+}
+
+/* ----------------------------------------------------------------
+   Centered band — applied ONLY while the Assistant is closed
+   Mintlify sets data-assistant-state on <html>. Scope every rule below away
+   from the open state so the band stands down the instant the Assistant opens
+   and the theme's native Assistant-safe layout takes over.
+
+   When closed, the whole page reads as one centered band: the fixed
+   sidebar slides in, the navbar's content row centers so the logo lines
+   up with it, and the [content + TOC] pair is centered on wide screens.
+   Built on Mintlify's documented ids (#navbar, #sidebar-content,
+   #content-area). See STYLE_NOTES.md.
+------------------------------------------------------------------ */
+html:not([data-assistant-state="open"]) #sidebar-content {
+  left: var(--tok-band-inset) !important;
+}
+
+html:not([data-assistant-state="open"]) #navbar > .relative {
+  max-width: 1360px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
 @media (min-width: 1440px) {
-  /* content area — fixed width, pushed toward the centre */
-  div:has(> [class*="max-w-[696px]"]) {
+  /* content column — fixed width, nudged toward the centre */
+  html:not([data-assistant-state="open"]) div:has(> #content-area) {
     flex: 0 0 auto !important;
     width: 784px !important;
     max-width: 784px !important;
     margin-left: auto !important;
   }
 
-  /* article — drop lg:mx-auto so it fills the content area */
-  [class*="max-w-[696px]"] {
+  /* article fills the fixed content column */
+  html:not([data-assistant-state="open"]) #content-area {
     max-width: 100% !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
   }
 
-  /* table of contents (the sibling after the content area) closes the pair */
-  div:has(> [class*="max-w-[696px]"]) + * {
+  /* TOC balances the pair so it centres */
+  html:not([data-assistant-state="open"]) div:has(> #content-area) + * {
     margin-right: auto !important;
   }
-}
-
-/* ----------------------------------------------------------------
-   Center the whole page as one band (wide screens)
-   The rules above already center the content + TOC. To bring the rest
-   of the page in to match: (1) slide the position:fixed sidebar inward
-   so it sits just left of the centered content, and (2) center the
-   header's content row on the same band so the logo lines up with the
-   sidebar. We deliberately do NOT pad the main content column — Luma
-   sizes the article via container queries, and padding it reintroduces
-   a phantom offset that shrinks the article and squashes the TOC.
-   max(...,0px) makes both no-ops below ~1360px, so narrow screens keep
-   the default layout.
------------------------------------------------------------------- */
-:root {
-  --tok-band-inset: max((100vw - 1360px) / 2, 0px);
-}
-
-/* fixed sidebar — slide it in beside the centered content */
-.fixed.w-56 {
-  left: var(--tok-band-inset) !important;
-}
-
-/* header content row — center it so the logo aligns with the sidebar */
-header.top-0.w-full > .relative {
-  max-width: 1360px !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
 }
 
 /* ----------------------------------------------------------------
