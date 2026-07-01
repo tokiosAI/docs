@@ -1,82 +1,53 @@
 ---
-title: "Download, install, and configure the Tokios Connector"
+title: "Install and pair the Tokios Connector"
 sidebarTitle: "Connector Install"
-description: "Download the tokios-connector binary, drop your ConnectorId and Token from the dashboard into tokios-connector.json, and open your outbound tunnel in minutes."
+description: "Run the Tokios Connector next to your model and pair it with a one-time claim code over an outbound WebSocket — no inbound ports, public IP, or hand-edited tokens."
 ---
 
-The Tokios Connector is a small console app that opens a secure outbound WebSocket to the Tokios gateway and forwards requests to your local model. Install it on the machine running your model — no inbound firewall rules required.
+The Tokios Connector is a small console app you run on the machine next to your model. It dials out to Tokios over a single WebSocket and forwards requests to your local model — no inbound ports, no public IP, no firewall changes.
 
-## 1. Create a connector in the dashboard
+You install and pair it from the console's **[Setup wizard](https://tokios.com/console/setup)** with a one-time **claim code**. For the basic path you don't hand-edit a config file — the connector receives its token securely over the tunnel after you approve the device.
 
-In the Tokios dashboard, create a connector. You'll get a **`ConnectorId`** and a **`Token`** — the token is shown only once, so copy it now.
+## 1. Get a claim code
 
-## 2. Download the binary
+In the console's **Setup** tab, click **Start pairing** (step 1). Tokios shows a claim code like `TKS-6KZY-4ZAW`, valid for about 15 minutes. Keep the tab open.
 
-Download `tokios-connector` for your platform from the dashboard's **Downloads** page.
+## 2. Install and run the connector
+
+On the machine next to your model, run the one-liner the console shows for your OS.
 
 <Tabs>
   <Tab title="Windows">
-    **Supported:** Windows 10 & 11 (x64)
+    Windows 10 & 11 (x64). In PowerShell:
 
-    Download `tokios-connector.exe` and place it in a directory of your choice — for example, `C:\tokios\`.
+    ```powershell
+    irm https://tokios.com/downloads/install/windows | iex; tokios-install -Code 'TKS-6KZY-4ZAW'
+    ```
   </Tab>
   <Tab title="macOS">
-    **Supported:** Apple Silicon (arm64)
-
-    Download `tokios-connector` and place it in a directory of your choice — for example, `~/tokios/`. Make it executable:
-
-    ```bash
-    chmod +x tokios-connector
-    ```
+    Apple Silicon (arm64). Copy the **macOS** one-liner shown in the Setup tab and run it in your terminal — it embeds your claim code.
   </Tab>
   <Tab title="Linux">
-    **Supported:** Linux (x64)
-
-    Download `tokios-connector` and place it in a directory of your choice — for example, `~/tokios/` or `/usr/local/bin/`. Make it executable:
-
-    ```bash
-    chmod +x tokios-connector
-    ```
+    Linux (x64). Copy the **Linux** one-liner shown in the Setup tab and run it in your terminal — it embeds your claim code.
   </Tab>
 </Tabs>
 
-## 3. Create the config file
+Already have `tokios-connector` installed? Skip the installer and pass the claim code directly:
 
-Next to the binary, create `tokios-connector.json` with your `ConnectorId` and `Token`, the model id your local server serves, and its URL:
-
-```json tokios-connector.json
-{
-  "Connector": {
-    "ConnectorId": "con_your_connector_id",
-    "Token": "ct-your-connector-token",
-    "Models": ["gemma4:e4b"],
-    "Upstream": {
-      "BaseUrl": "http://127.0.0.1:11434/v1"
-    }
-  }
-}
+```bash
+tokios-connector TKS-6KZY-4ZAW
 ```
 
-`BaseUrl` must include the `/v1` segment and point at your model server. The default above is Ollama — see [Backends](/setup/supported-backends) for llama.cpp, vLLM, and LM Studio, and [Connector Config](/reference/connector-config) for every option.
+## 3. Approve the device
 
-## 4. Run the connector
-
-<CodeGroup>
-
-```bash macOS / Linux
-./tokios-connector --config tokios-connector.json
-```
-
-```powershell Windows
-tokios-connector.exe --config tokios-connector.json
-```
-
-</CodeGroup>
-
-The connector prints `Loaded connector config from: ...` and dials the gateway. Once it's connected it holds a single outbound WebSocket — no inbound ports were opened on your machine.
+The connector dials out and appears in the console. In the **Setup** tab (or the [Connectors](https://tokios.com/console/connectors) tab), **approve** the device. Tokios then delivers the connector's token over the tunnel — it is never shown on screen or pasted into a file.
 
 <Note>
-  The connector never listens on a port; it only dials out, so your firewall needs no changes.
+  The connector only dials out; it never listens on a port, so your firewall needs no inbound rules.
 </Note>
 
-Once it's running, [register your model](/setup/register-model) as a deployment and [create an API key](/setup/api-keys).
+Once it's connected, [register your model](/setup/register-model) and [create an API key](/setup/api-keys).
+
+## Advanced: expose multiple models with a config file
+
+To serve several models through one connector, run the connector with a JSON config that defines each upstream instead of pairing a single model. See [Connector Config](/reference/connector-config).

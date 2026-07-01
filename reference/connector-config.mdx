@@ -7,7 +7,7 @@ description: "Full reference for the Tokios Connector config file and CLI flags 
 The Tokios Connector reads its settings from a JSON config file. You pass the file with `--config`, and any setting can be overridden with a command-line flag at startup. The connector never reads environment variables, and it only ever forwards to the upstreams you define here — never to a URL supplied by the gateway.
 
 <Note>
-  Your `ConnectorId` and `Token` are issued by the Tokios dashboard when you create a connector. The token is shown only once — paste it into your config file and store it somewhere safe.
+  Your `ConnectorId` and `Token` are issued by the Tokios console when you create a connector. The token is shown only once — paste it into your config file and store it somewhere safe.
 </Note>
 
 ## The config file
@@ -36,11 +36,11 @@ tokios-connector --config tokios-connector.json
 ## `Connector` fields
 
 <ParamField body="ConnectorId" type="string" required>
-  The connector's id from the dashboard (e.g. `con_...`). Identifies this connector to the Tokios gateway.
+  The connector's id from the console (e.g. `con_...`). Identifies this connector to the Tokios gateway.
 </ParamField>
 
 <ParamField body="Token" type="string" required>
-  The connector token issued when you create the connector (e.g. `ct-...`), bound to your tenant. Shown only once in the dashboard.
+  The connector token issued when you create the connector (e.g. `ct-...`), bound to your tenant. Shown only once in the console.
 </ParamField>
 
 <ParamField body="ServerUrl" type="string">
@@ -83,7 +83,7 @@ Pick **one** of two shapes — specifying both is rejected.
 }
 ```
 
-The ids in `Models` / `Routes[].Model` are the model ids your local server uses — what you'd send it directly (e.g. `gemma4:e4b` in Ollama). You expose one under a public API name (e.g. `gemma-tunnel`) by registering a **deployment** in the dashboard; that public name is what clients send in the `"model"` field, and the gateway rewrites it to the upstream id before forwarding it down the tunnel. See [Model Routing](/guides/model-routing).
+The ids in `Models` / `Routes[].Model` are the model ids your local server uses — what you'd send it directly (e.g. `gemma4:e4b` in Ollama). You expose one under a public API name (e.g. `gemma-tunnel`) by registering a **deployment** in the console; that public name is what clients send in the `"model"` field, and the gateway rewrites it to the upstream id before forwarding it down the tunnel. See [Model Routing](/guides/model-routing).
 
 ## Upstream fields
 

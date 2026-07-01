@@ -1,66 +1,32 @@
 ---
-title: "Register a Model Deployment in the Tokios Dashboard"
+title: "Register your model in the Tokios console"
 sidebarTitle: "Register Model"
-description: "Pair the Tokios Connector with your dashboard account to register your local model as a named deployment reachable at api.tokios.com."
+description: "Give your paired connector's model a public name at api.tokios.com — the string clients pass as the model field in every request."
 ---
 
-A **deployment** maps a public model name to a connector and the upstream model id it serves. The public name is the string you pass as the `"model"` field in every API call — for example, `gemma-tunnel`.
+Registering a model maps a **public name** to your paired connector and the model it serves. The public name is the string you pass as `"model"` in every API call — for example, `gemma-tunnel`.
 
-## Register your deployment
+Do this after your connector is paired and approved — see [Connector Install](/setup/connector-install).
+
+## Register your model
 
 <Steps>
-  <Step title="Open the dashboard">
-    Go to your [Tokios account dashboard](https://tokios.com/dashboard). When the connector is running and the tunnel is live, you'll see its status displayed as **Connected**.
-
-    If the status shows **Waiting** or **Disconnected**, check that the connector is running on your local machine and that `tokios.json` contains the correct `tunnel_token`.
+  <Step title="Confirm the connector is connected">
+    In the console's [Connectors](https://tokios.com/console/connectors) tab, confirm your connector shows as connected. If it doesn't, make sure the connector is still running on your model's machine and that you approved the device during pairing.
   </Step>
-  <Step title="Confirm your connector is online">
-    Open the [Tokios dashboard](https://tokios.com/dashboard). With the connector running, it shows as **Connected**. If it shows **Waiting** or **Disconnected**, check that the connector is running and that `tokios-connector.json` has the correct `ConnectorId` and `Token`.
-  </Step>
-  <Step title="Pair the connector">
-    Click **Pair Connector**. The dashboard will either:
+  <Step title="Pick the model and public name">
+    Open the [Models](https://tokios.com/console/models) tab (step 3 of the Setup wizard). Choose the model to expose through your connector and give it the **public name** your clients will use.
 
-    - **Auto-detect** the running connector and prompt you to confirm the pairing, or
-    - Ask you to **enter the pairing code** shown in the connector's terminal output.
-
-    The pairing code is displayed in the connector's startup logs, directly below the `Tunnel established` message.
-  </Step>
-  <Step title="Name the deployment">
-    Choose a model name for this deployment — for example, `gemma-tunnel` or `llama3-local`. This is the exact string you will pass as the `"model"` field in every API request routed to this connector.
-
-    **Naming rules:**
-
-    - Lowercase alphanumeric characters only
-    - Hyphens (`-`) are allowed
-    - No spaces, underscores, or special characters
-
-    Good examples: `gemma-tunnel`, `llama3-local`, `mistral-home`
-  </Step>
-  <Step title="Create a deployment">
-    Create a new deployment and fill in:
-
-    - **Public name** — the model name clients will use, e.g. `gemma-tunnel`.
-    - **Connector** — the connector that serves this model.
-    - **Upstream model** — the model id the connector forwards to your local server (what your server calls it, e.g. `gemma4:e4b`).
+    Use a short, lowercase, hyphenated name — for example, `gemma-tunnel`, `llama3-local`, or `mistral-home`.
   </Step>
   <Step title="Save">
-    Click **Register**. The model now appears as an active deployment under your account and is immediately reachable at `api.tokios.com`.
-  </Step>
-  <Step title="Save">
-    Save the deployment. The model is immediately reachable at `api.tokios.com` under its public name.
+    Save the model. It's now reachable at `api.tokios.com` under its public name.
   </Step>
 </Steps>
 
-**Public name rules:**
-
-- Lowercase alphanumeric characters and hyphens (`-`)
-- No spaces, underscores, or special characters
-
-Good examples: `gemma-tunnel`, `llama3-local`, `mistral-home`.
-
 ## Use the public name in API calls
 
-Pass the public name as the `model` field. The gateway resolves it to your connector and rewrites it to the upstream model id before forwarding:
+Pass the public name as the `model` field. The gateway resolves it to your connector before forwarding:
 
 ```json
 {
@@ -69,6 +35,6 @@ Pass the public name as the `model` field. The gateway resolves it to your conne
 }
 ```
 
-<Note>
-  One connector can serve several models — register a deployment for each public name, all pointing at the same connector with different upstream model ids. See [Model Routing](/guides/model-routing).
-</Note>
+## Advanced: serve multiple models from one connector
+
+One connector can expose several models. Register a public name for each, or define multiple upstreams in a connector config file. See [Model Routing](/guides/model-routing) and [Connector Config](/reference/connector-config).

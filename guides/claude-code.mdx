@@ -19,14 +19,14 @@ Claude Code reads two environment variables to determine where to send requests.
   <Tab title="Windows CMD">
     ```cmd claude-code-windows.cmd
     set ANTHROPIC_BASE_URL=https://api.tokios.com
-    set ANTHROPIC_API_KEY=sk-tokios-YOUR_KEY_HERE
+    set ANTHROPIC_API_KEY=sk-tok-YOUR_KEY_HERE
     claude --model gemma-tunnel
     ```
   </Tab>
   <Tab title="macOS & Linux">
     ```bash claude-code-unix.sh
     export ANTHROPIC_BASE_URL=https://api.tokios.com
-    export ANTHROPIC_API_KEY=sk-tokios-YOUR_KEY_HERE
+    export ANTHROPIC_API_KEY=sk-tok-YOUR_KEY_HERE
     claude --model gemma-tunnel
     ```
   </Tab>
@@ -46,7 +46,7 @@ Open your shell profile and append:
 
 ```bash
 export ANTHROPIC_BASE_URL=https://api.tokios.com
-export ANTHROPIC_API_KEY=sk-tokios-YOUR_KEY_HERE
+export ANTHROPIC_API_KEY=sk-tok-YOUR_KEY_HERE
 ```
 
 Then reload it:
@@ -61,7 +61,7 @@ If your workflow supports `.env` files (for example, via `direnv` or a shell plu
 
 ```bash .env
 ANTHROPIC_BASE_URL=https://api.tokios.com
-ANTHROPIC_API_KEY=sk-tokios-YOUR_KEY_HERE
+ANTHROPIC_API_KEY=sk-tok-YOUR_KEY_HERE
 ```
 
 Load it before starting Claude Code:
