@@ -28,26 +28,25 @@ Mintlify's **Luma** theme. Prefer the documented stable ids (`#navbar`,
 **The layout is a centered band while the Assistant is closed, and the theme's native
 layout while it's open.** The two pieces:
 
-- `assistant-state.js` (a repo-root JS file Mintlify runs on every page) watches
-  `#chat-assistant-sheet` with a `MutationObserver` and toggles an `assistant-open`
-  class on `<html>` from the panel's width (0 = closed, wide = open).
-- Every band rule in `style.css` is scoped with `html:not(.assistant-open)`, so it
-  applies only while the Assistant is closed. The band: slide the fixed sidebar in
+- Mintlify sets `data-assistant-state="closed"` or `data-assistant-state="open"`
+  on `<html>`.
+- Every band rule in `style.css` is scoped with
+  `html:not([data-assistant-state="open"])`, so it applies while the Assistant is
+  closed or absent in local preview. The band: slide the fixed sidebar in
   (`#sidebar-content { left: var(--tok-band-inset) }`), center the navbar's content row
   (`#navbar > .relative`), and center the `[content + TOC]` pair on ≥1440px screens
   (fixed-width content column + flex auto-margins).
-- The instant the Assistant opens, the class flips and every band rule drops out, so the
-  theme's native (Assistant-safe) layout takes over — no more content shoved sideways.
+- The instant the Assistant opens, the attribute flips and every band rule drops out, so
+  the theme's native Assistant-safe layout takes over.
 
-### Why the band needs the JS signal
+### Why the band needs the Assistant state
 
 The band **broke** on the live site when the Assistant opened: the panel shrinks the
 layout and collapses the TOC to width 0, so the content's `margin-left: auto` had
 nothing to balance and shoved the content under the panel, and the `100vw`-positioned
-fixed sidebar overlapped it. There is no native DOM signal for "Assistant open" (no
-`aria-expanded` / `data-state` on `#assistant-entry`), so `assistant-state.js` creates
-one. `mint dev` has no Assistant, so `assistant-open` is never set there and the band
-always applies locally.
+fixed sidebar overlapped it. Mintlify exposes the Assistant state on `<html>` with
+`data-assistant-state`, so the band can stand down without custom JavaScript. `mint dev`
+has no Assistant, so the selector treats the missing state as closed.
 
 Two Luma gotchas worth remembering:
 
@@ -68,10 +67,10 @@ Two Luma gotchas worth remembering:
 ### Fragility
 The band is built on Mintlify's documented ids (`#navbar`, `#sidebar-content`,
 `#content-area`) plus `div:has(> #content-area)` for the content column / TOC sibling,
-`#navigation-items` for the sidebar links, and `#chat-assistant-sheet` for the Assistant
-signal in `assistant-state.js`. A Mintlify version bump can rename or restructure these
-— **re-verify after upgrading Mintlify, and always check both states: Assistant closed
-AND open.** Custom JS/CSS is loaded from any `.js` / `.css` file in the repo root.
+`#navigation-items` for the sidebar links, and `data-assistant-state` on `<html>`.
+A Mintlify version bump can rename or restructure these — **re-verify after upgrading
+Mintlify, and always check both states: Assistant closed AND open.** Custom JS/CSS is
+loaded from any `.js` / `.css` file in the repo root.
 
 ## The cleaner approach for the future (x.com style)
 

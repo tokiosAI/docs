@@ -146,11 +146,9 @@ div:has(> #content-area) + * {
 
 /* ----------------------------------------------------------------
    Centered band — applied ONLY while the Assistant is closed
-   assistant-state.js toggles `assistant-open` on <html> when the panel
-   (#chat-assistant-sheet) is visible. `html:not(.assistant-open)` scopes
-   every rule below, so the band stands down the instant the Assistant
-   opens and the theme's native (Assistant-safe) layout takes over — that
-   is what fixes the "content shoved sideways" bug.
+   Mintlify sets data-assistant-state on <html>. Scope every rule below away
+   from the open state so the band stands down the instant the Assistant opens
+   and the theme's native Assistant-safe layout takes over.
 
    When closed, the whole page reads as one centered band: the fixed
    sidebar slides in, the navbar's content row centers so the logo lines
@@ -158,11 +156,11 @@ div:has(> #content-area) + * {
    Built on Mintlify's documented ids (#navbar, #sidebar-content,
    #content-area). See STYLE_NOTES.md.
 ------------------------------------------------------------------ */
-html:not(.assistant-open) #sidebar-content {
+html:not([data-assistant-state="open"]) #sidebar-content {
   left: var(--tok-band-inset) !important;
 }
 
-html:not(.assistant-open) #navbar > .relative {
+html:not([data-assistant-state="open"]) #navbar > .relative {
   max-width: 1360px !important;
   margin-left: auto !important;
   margin-right: auto !important;
@@ -170,7 +168,7 @@ html:not(.assistant-open) #navbar > .relative {
 
 @media (min-width: 1440px) {
   /* content column — fixed width, nudged toward the centre */
-  html:not(.assistant-open) div:has(> #content-area) {
+  html:not([data-assistant-state="open"]) div:has(> #content-area) {
     flex: 0 0 auto !important;
     width: 784px !important;
     max-width: 784px !important;
@@ -178,14 +176,14 @@ html:not(.assistant-open) #navbar > .relative {
   }
 
   /* article fills the fixed content column */
-  html:not(.assistant-open) #content-area {
+  html:not([data-assistant-state="open"]) #content-area {
     max-width: 100% !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
   }
 
   /* TOC balances the pair so it centres */
-  html:not(.assistant-open) div:has(> #content-area) + * {
+  html:not([data-assistant-state="open"]) div:has(> #content-area) + * {
     margin-right: auto !important;
   }
 }
