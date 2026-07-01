@@ -31,7 +31,7 @@ A single connector can serve several models. List each upstream model id in `Rou
 }
 ```
 
-Then register a **deployment** for each model in the dashboard, giving each a public name (e.g. `gemma-tunnel` → `gemma4:e4b`, `qwen-coder` → `qwen2.5-coder`), all pointing at this connector.
+Then register a **deployment** for each model in the console, giving each a public name (e.g. `gemma-tunnel` → `gemma4:e4b`, `qwen-coder` → `qwen2.5-coder`), all pointing at this connector.
 
 <Tip>
   Prefer to keep them separate? You can also run one connector per model, each with its own `ConnectorId`/`Token` and `Upstream`. Either approach works — the server only ever sends the model id down the tunnel.
@@ -44,13 +44,13 @@ With both deployments registered, switch models by changing only the `model` fie
 ```bash
 # Use the Gemma model
 curl https://api.tokios.com/v1/chat/completions \
-  -H "Authorization: Bearer sk-tokios-YOUR_KEY" \
+  -H "Authorization: Bearer sk-tok-YOUR_KEY" \
   -H "Content-Type: application/json" \
   -d '{"model": "gemma-tunnel", "messages": [{"role": "user", "content": "Hello"}]}'
 
 # Use the Qwen model
 curl https://api.tokios.com/v1/chat/completions \
-  -H "Authorization: Bearer sk-tokios-YOUR_KEY" \
+  -H "Authorization: Bearer sk-tok-YOUR_KEY" \
   -H "Content-Type: application/json" \
   -d '{"model": "qwen-coder", "messages": [{"role": "user", "content": "Hello"}]}'
 ```

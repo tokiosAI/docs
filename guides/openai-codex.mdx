@@ -20,11 +20,11 @@ Set your Tokios key in the environment, then add a Tokios provider and profile t
 <CodeGroup>
 
 ```bash macOS / Linux
-export OPENAI_API_KEY=sk-tokios-YOUR_KEY_HERE
+export OPENAI_API_KEY=sk-tok-YOUR_KEY_HERE
 ```
 
 ```powershell Windows
-set OPENAI_API_KEY=sk-tokios-YOUR_KEY_HERE
+set OPENAI_API_KEY=sk-tok-YOUR_KEY_HERE
 ```
 
 </CodeGroup>
@@ -51,7 +51,7 @@ Then run Codex with the Tokios profile:
 codex --profile tokios
 ```
 
-Replace `gemma-tunnel` with the public model name you registered in the dashboard.
+Replace `gemma-tunnel` with the public model name you registered in the console.
 
 ## Using the OpenAI Python SDK
 
@@ -62,7 +62,7 @@ from openai import OpenAI
 
 client = OpenAI(
     base_url="https://api.tokios.com/v1",
-    api_key="sk-tokios-YOUR_KEY_HERE",
+    api_key="sk-tok-YOUR_KEY_HERE",
 )
 
 response = client.chat.completions.create(

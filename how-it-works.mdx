@@ -40,8 +40,8 @@ The connector maintains a persistent outbound WebSocket to the Tokios gateway. C
 
 When a coding agent fires off an API call, here's exactly what happens:
 
-1. **The client sends a request** to `https://api.tokios.com/v1/chat/completions` (or `/v1/messages`, `/v1/responses`) with an `Authorization: Bearer sk-tokios-...` header.
-2. **Tokios authenticates the key** and resolves the deployment. The gateway validates the `sk-tokios-...` token against your tenant, confirms the key is active, looks up the deployment named in the `model` field (e.g. `gemma-tunnel`), and rewrites it to that deployment's upstream model id (e.g. `gemma4:e4b`).
+1. **The client sends a request** to `https://api.tokios.com/v1/chat/completions` (or `/v1/messages`, `/v1/responses`) with an `Authorization: Bearer sk-tok-...` header.
+2. **Tokios authenticates the key** and resolves the deployment. The gateway validates the `sk-tok-...` token against your tenant, confirms the key is active, looks up the deployment named in the `model` field (e.g. `gemma-tunnel`), and rewrites it to that deployment's upstream model id (e.g. `gemma4:e4b`).
 3. **The gateway translates and sends the request down the tunnel.** If the client spoke Anthropic Messages or OpenAI Responses, the gateway first converts it to OpenAI Chat Completions (see below), then forwards it over the open WebSocket held by the connector for that deployment.
 4. **The connector forwards to your local model.** `tokios-connector` receives the Chat Completions request from the tunnel and makes a standard HTTP call to the `BaseUrl` you configured — for example, `http://127.0.0.1:11434/v1` for Ollama. From the local model's perspective, it's just a regular local request.
 5. **The response streams back.** The local model's response — including streamed tokens if you requested `"stream": true` — travels back up the tunnel to the Tokios gateway, which forwards it to the waiting client. End-to-end, the round-trip looks and behaves like any other HTTP API call.
@@ -63,7 +63,7 @@ Because the architecture is outbound-only and tenant-scoped, the attack surface 
 - **No inbound ports are opened** on your machine. There is nothing for a remote attacker to probe or connect to.
 - **Your models stay on localhost.** By default the connector forwards only to loopback (`127.0.0.1`); reaching a model on your LAN requires an explicit opt-in. Your model is never exposed to the internet.
 - **Prompts and responses are encrypted in transit.** All traffic between the connector and `api.tokios.com` runs over a TLS-secured WebSocket (`wss://`). Data never travels the open internet in plaintext.
-- **Tenant-scoped API keys limit blast radius.** Each `sk-tokios-...` key is scoped to your tenant and the deployments you register. A leaked key cannot reach another customer's models or infrastructure.
+- **Tenant-scoped API keys limit blast radius.** Each `sk-tok-...` key is scoped to your tenant and the deployments you register. A leaked key cannot reach another customer's models or infrastructure.
 
 <Note>
   Your model weights and every prompt stay on your hardware. Tokios routes the request long enough to forward it down the tunnel — it does not store prompt content or completions.

@@ -1,28 +1,37 @@
 ---
-title: "Connect Any OpenAI or Anthropic-Compatible Client to Tokios"
+title: "Connect any OpenAI- or Anthropic-compatible client to Tokios"
 sidebarTitle: "Compatible Clients"
-description: "Any client that supports a custom base URL for OpenAI or Anthropic APIs can route to your local model through Tokios with two config changes."
+description: "Point any client that supports a custom base URL at Tokios: use the /v1 base for OpenAI-style clients and the root base for Anthropic-style clients."
 ---
 
-Tokios exposes standard OpenAI and Anthropic API surfaces, so any tool or library that allows you to override the base URL works out of the box. The only changes needed are the base URL and your Tokios API key.
+Tokios exposes standard OpenAI and Anthropic API surfaces, so any client that lets you set a custom base URL works. You change two things: the **base URL** and your **API key** (`sk-tok-…`). The `"model"` value is the public name you registered (for example, `gemma-tunnel`).
 
-## Supported clients
+## Which base URL?
 
-| Client | Base URL env/setting | API key env/setting |
+Pick the base URL by the API shape your client speaks:
+
+| Client speaks… | Base URL | Examples |
 |---|---|---|
-| Claude Code | `ANTHROPIC_BASE_URL` | `ANTHROPIC_API_KEY` |
-| OpenAI Codex | `OPENAI_BASE_URL` | `OPENAI_API_KEY` |
-| OpenAI Python SDK | `base_url` param | `api_key` param |
-| OpenAI Node.js SDK | `baseURL` param | `apiKey` param |
+| OpenAI style | `https://api.tokios.com/v1` | OpenAI Codex, OpenAI SDKs, Aider, Cline, Continue, Open WebUI, AnythingLLM, LangChain |
+| Anthropic style | `https://api.tokios.com` (no `/v1`) | Claude Code, Anthropic SDKs |
+
+## Per-client setup
+
+| Client | Base URL setting | API key setting |
+|---|---|---|
+| Claude Code | `ANTHROPIC_BASE_URL` = `https://api.tokios.com` | `ANTHROPIC_API_KEY` |
+| OpenAI Codex | `base_url` in `~/.codex/config.toml` — see [OpenAI Codex](/guides/openai-codex) | `OPENAI_API_KEY` |
+| Aider | `--openai-api-base https://api.tokios.com/v1` | `OPENAI_API_KEY` |
+| Cline / Continue | OpenAI-compatible base URL field | API key field |
+| Open WebUI / AnythingLLM | OpenAI-compatible base URL field | API key field |
+| OpenAI SDK (Python / Node) | `base_url` / `baseURL` param | `api_key` / `apiKey` param |
 | LangChain (Python) | `openai_api_base` | `openai_api_key` |
-| Cursor IDE | Custom model base URL | API key field |
-| Continue.dev | `apiBase` | `apiKey` |
 
 <Tip>
-  If your client uses `OPENAI_BASE_URL` or `ANTHROPIC_BASE_URL`, you can set those environment variables once and every compatible tool in your terminal session picks them up automatically.
+  Clients that read `OPENAI_BASE_URL` or `ANTHROPIC_BASE_URL` pick Tokios up automatically once you export those variables in your shell.
 </Tip>
 
-## Code examples
+## Examples
 
 ### OpenAI Node.js SDK
 
@@ -31,7 +40,7 @@ import OpenAI from 'openai';
 
 const client = new OpenAI({
   baseURL: 'https://api.tokios.com/v1',
-  apiKey: 'sk-tokios-YOUR_KEY_HERE',
+  apiKey: 'sk-tok-YOUR_KEY',
 });
 
 const response = await client.chat.completions.create({
@@ -49,8 +58,7 @@ from langchain_openai import ChatOpenAI
 llm = ChatOpenAI(
     model="gemma-tunnel",
     openai_api_base="https://api.tokios.com/v1",
-    openai_api_key="sk-tokios-YOUR_KEY_HERE",
+    openai_api_key="sk-tok-YOUR_KEY",
 )
-result = llm.invoke("Summarize this code: print('hello')")
-print(result.content)
+print(llm.invoke("Summarize this code: print('hello')").content)
 ```
